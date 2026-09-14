@@ -5,147 +5,172 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#061520">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f6f0dd">
 <title>Морской бой</title>
 <script src="/sdk.js"></script>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
   :root {
-    --cell: clamp(26px, 3.6vw, 40px);
-    --gap: 2px;
+    --cell: clamp(24px, 3.2vw, 38px);
+
+    --paper-bg: #f6f0dd;
+    --paper-board: #fdf9ea;
+    --paper-input: #fbf6e6;
+    --grid-line: rgba(70, 120, 170, 0.42);
+    --grid-frame: #3a5a85;
+    --ink: #1a3a5c;
+    --ink-soft: #4a6a8c;
+    --ink-faded: #8a9cb4;
+
+    --ship4-c1: #e09088; --ship4-c2: #c85048; --ship4-c3: #8a2e28;
+    --ship3-c1: #e8b878; --ship3-c2: #d09030; --ship3-c3: #90581a;
+    --ship2-c1: #90c8a0; --ship2-c2: #4a8a5a; --ship2-c3: #2a5a3a;
+    --ship1-c1: #88b0e0; --ship1-c2: #3a70b0; --ship1-c3: #1a4a80;
+
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
     --safe-left: env(safe-area-inset-left, 0px);
     --safe-right: env(safe-area-inset-right, 0px);
-
-    --ship4-c1: #f0a0a0;  --ship4-c2: #d05050;  --ship4-c3: #8a2c2c;
-    --ship3-c1: #f0c890;  --ship3-c2: #e0a040;  --ship3-c3: #9a6420;
-    --ship2-c1: #a8e0b8;  --ship2-c2: #60b878;  --ship2-c3: #2e7848;
-    --ship1-c1: #a8d0f0;  --ship1-c2: #5a9ad0;  --ship1-c3: #2e6498;
   }
 
   html, body { height: 100%; margin: 0; }
 
   body {
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
-    padding: calc(14px + var(--safe-top)) calc(14px + var(--safe-right))
-             calc(20px + var(--safe-bottom)) calc(14px + var(--safe-left));
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-    color: #dceeff;
-    background:
-      radial-gradient(circle at 20% -10%, #1b4a6e 0%, transparent 55%),
-      radial-gradient(circle at 90% 110%, #123b52 0%, transparent 50%),
-      linear-gradient(180deg, #061520 0%, #030a12 100%);
+    align-items: center;
+    padding: calc(8px + var(--safe-top)) calc(10px + var(--safe-right))
+             calc(10px + var(--safe-bottom)) calc(10px + var(--safe-left));
+    font-family: 'Courier New', Courier, 'Lucida Console', monospace;
+    color: var(--ink);
+    background-color: var(--paper-bg);
+    background-image:
+      linear-gradient(rgba(70, 120, 170, 0.16) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(70, 120, 170, 0.16) 1px, transparent 1px);
+    background-size: 22px 22px;
     background-attachment: fixed;
-    overflow-x: hidden;
+    overflow: hidden;
     touch-action: manipulation;
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
   }
 
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at 50% 40%, transparent 55%, rgba(80, 90, 110, 0.06) 100%);
+    z-index: 0;
+  }
+
   .game {
+    position: relative;
+    z-index: 1;
     width: 100%;
-    max-width: 1100px;
+    max-width: 1400px;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 14px;
+    justify-content: center;
+    gap: 6px;
+    overflow: hidden;
   }
 
   .main-title {
     margin: 0;
     text-align: center;
-    font-size: clamp(20px, 3.4vw, 32px);
-    letter-spacing: 4px;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(16px, 2.4vw, 24px);
+    letter-spacing: 3px;
     text-transform: uppercase;
-    font-weight: 800;
-    background: linear-gradient(180deg, #bfe9ff, #4d9dc9);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    text-shadow: 0 6px 24px rgba(70, 170, 230, .25);
-    line-height: 1.15;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.1;
+    padding-bottom: 2px;
+    border-bottom: 2px solid var(--ink);
+    display: inline-block;
+    flex: 0 0 auto;
   }
 
   .boards {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    gap: clamp(14px, 3vw, 40px);
-    flex-wrap: wrap;
-    width: 100%;
+    gap: clamp(14px, 2.4vw, 36px);
+    flex-wrap: nowrap;
+    flex: 0 1 auto;
+    min-height: 0;
+    transition: gap .3s ease;
   }
 
   .board-wrap {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
+    flex: 0 0 auto;
   }
 
   .board-title {
-    font-size: 11px;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 10px;
     letter-spacing: 1.5px;
     text-transform: uppercase;
-    color: #6fa8cc;
+    color: var(--ink);
     font-weight: 700;
     text-align: center;
     white-space: nowrap;
-    line-height: 1.2;
-    min-height: 14px;
+    line-height: 1.15;
+    min-height: 12px;
+    padding-bottom: 1px;
+    border-bottom: 1px dashed var(--ink-faded);
   }
 
+  /* ============================================================
+     СЕТКА — размер клетки плавно увеличивается в battle-mode
+     ============================================================ */
   .grid {
     display: grid;
     grid-template-columns: repeat(10, var(--cell));
     grid-template-rows: repeat(10, var(--cell));
-    gap: var(--gap);
-    padding: 6px;
-    border-radius: 11px;
-    background: rgba(10, 40, 65, .55);
-    border: 1px solid rgba(90, 175, 230, .18);
+    gap: 0;
+    padding: 0;
+    border: 2px solid var(--grid-frame);
+    background: var(--paper-board);
     box-shadow:
-      0 14px 40px rgba(0, 0, 0, .55),
-      inset 0 0 40px rgba(60, 150, 210, .07);
+      4px 4px 0 rgba(60, 100, 160, 0.14),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.55);
     touch-action: manipulation;
-  }
-
-  .grid.enemy-active .cell:not(.shot):active {
-    background: #24506f;
-    transform: scale(1.08);
-    box-shadow: 0 0 10px rgba(90, 200, 255, .5);
-  }
-
-  .grid.place-active .cell:not(.ship):active {
-    background: #1d445f;
-    transform: scale(1.06);
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .grid.enemy-active .cell:not(.shot):hover {
-      background: #24506f;
-      transform: scale(1.08);
-      box-shadow: 0 0 10px rgba(90, 200, 255, .5);
-    }
-    .grid.place-active .cell:not(.ship):hover {
-      background: #1d445f;
-      transform: scale(1.06);
-    }
+    transition:
+      grid-template-columns .35s ease,
+      grid-template-rows .35s ease;
   }
 
   .cell {
     position: relative;
-    border-radius: 3px;
-    background: linear-gradient(160deg, #10314c, #0b2237);
-    box-shadow: inset 0 1px 0 rgba(120, 200, 255, .07);
-    transition: background .12s ease, transform .12s ease, box-shadow .12s ease;
+    background: transparent;
+    border-right: 1px solid var(--grid-line);
+    border-bottom: 1px solid var(--grid-line);
     cursor: pointer;
+    transition: background .1s ease;
+  }
+
+  .grid .cell:nth-child(10n) { border-right: none; }
+  .grid .cell:nth-last-child(-n+10) { border-bottom: none; }
+
+  .grid.enemy-active .cell:not(.shot):active { background: rgba(120, 170, 220, 0.35); }
+  .grid.place-active .cell:not(.ship):active { background: rgba(140, 180, 220, 0.28); }
+
+  @media (hover: hover) and (pointer: fine) {
+    .grid.enemy-active .cell:not(.shot):hover { background: rgba(120, 170, 220, 0.3); }
+    .grid.place-active .cell:not(.ship):hover { background: rgba(140, 180, 220, 0.25); }
   }
 
   .cell.ship-size-1 { --c1: var(--ship1-c1); --c2: var(--ship1-c2); --c3: var(--ship1-c3); }
@@ -154,48 +179,33 @@
   .cell.ship-size-4 { --c1: var(--ship4-c1); --c2: var(--ship4-c2); --c3: var(--ship4-c3); }
 
   .cell.ship {
-    background: linear-gradient(180deg, var(--c1) 0%, var(--c2) 45%, var(--c3) 100%);
+    background: linear-gradient(180deg, var(--c1) 0%, var(--c2) 50%, var(--c3) 100%);
     box-shadow:
-      0 0 0 1px var(--c2),
-      inset 0 1px 0 rgba(255, 255, 255, .45),
-      inset 0 -1px 0 rgba(0, 0, 0, .28),
-      0 2px 6px rgba(0, 0, 0, .35);
+      inset 0 1px 0 rgba(255, 255, 255, 0.4),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.18);
   }
-
-  .cell.ship-shape-single { border-radius: 50%; }
-  .cell.ship-shape-h-bow   { border-radius: 50% 2px 2px 50% / 50% 2px 2px 50%; }
-  .cell.ship-shape-h-mid   { border-radius: 2px; }
-  .cell.ship-shape-h-stern { border-radius: 2px 50% 50% 2px / 2px 50% 50% 2px; }
-  .cell.ship-shape-v-bow   { border-radius: 50% 50% 2px 2px / 50% 50% 2px 2px; }
-  .cell.ship-shape-v-mid   { border-radius: 2px; }
-  .cell.ship-shape-v-stern { border-radius: 2px 2px 50% 50% / 2px 2px 50% 50%; }
 
   .cell.miss::after,
   .cell.auto::after {
     content: '';
     position: absolute;
     left: 50%; top: 50%;
-    width: 26%; height: 26%;
+    width: 30%; height: 30%;
     transform: translate(-50%, -50%);
     border-radius: 50%;
-    background: #35688f;
+    background: var(--ink-soft);
   }
-  .cell.auto::after { background: #244a68; }
+  .cell.auto::after { background: var(--ink-faded); opacity: 0.75; }
 
   .cell.hit {
-    background: linear-gradient(160deg, #ff7a4d, #d92e2e);
-    box-shadow:
-      0 0 0 1px #d92e2e,
-      inset 0 1px 0 rgba(255,255,255,.35),
-      inset 0 -1px 0 rgba(0,0,0,.3),
-      0 0 12px rgba(255, 90, 60, .6);
+    background: linear-gradient(180deg, #f07060 0%, #c83030 50%, #8a1818 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 -1px 0 rgba(0, 0, 0, 0.25);
   }
 
   .cell.sunk {
-    background: linear-gradient(160deg, #5c1c1c, #39100f);
-    box-shadow:
-      0 0 0 1px #39100f,
-      inset 0 0 10px rgba(0,0,0,.7);
+    background: linear-gradient(180deg, #6a2828 0%, #4a1010 50%, #2a0808 100%);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35), inset 0 0 12px rgba(0, 0, 0, 0.5);
   }
 
   .cell.hit::after,
@@ -206,186 +216,179 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: calc(var(--cell) * .62);
-    font-weight: 800;
+    font-family: 'Courier New', monospace;
+    font-size: calc(var(--cell) * 0.72);
+    font-weight: 900;
     line-height: 1;
-    color: rgba(255, 255, 255, .9);
-    text-shadow: 0 1px 3px rgba(0,0,0,.5);
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
   }
-  .cell.sunk::after { color: rgba(255, 190, 180, .55); }
+  .cell.sunk::after { color: rgba(255, 190, 180, 0.5); text-shadow: none; }
 
-  .cell.scouted {
-    background: linear-gradient(160deg, #2a4a2a, #1a3a1a);
-    box-shadow: 0 0 0 1px rgba(255, 210, 100, .4);
-  }
+  .cell.scouted { background: rgba(255, 220, 110, 0.28); }
 
   .cell.scouted::before {
     content: '';
     position: absolute;
-    inset: 14%;
-    border: 2.5px solid #ffcc44;
+    inset: 16%;
+    border: 2px solid #c89020;
     border-radius: 50%;
-    box-shadow:
-      0 0 14px rgba(255, 200, 70, .8),
-      inset 0 0 8px rgba(255, 200, 70, .5);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.6);
     animation: scoutPulse 1.4s ease-in-out infinite;
     pointer-events: none;
   }
 
   @keyframes scoutPulse {
-    0%, 100% { opacity: .95; transform: scale(.82); }
-    50%      { opacity: .45; transform: scale(1.12); }
+    0%, 100% { opacity: 1; transform: scale(0.75); }
+    50%      { opacity: 0.4; transform: scale(1.1); }
   }
 
   .cell.preview-ok {
-    background: linear-gradient(180deg, #6de0a0 0%, #40b878 45%, #208050 100%);
-    box-shadow:
-      0 0 0 1px #40b878,
-      0 0 12px rgba(70, 220, 140, .6),
-      inset 0 1px 0 rgba(255,255,255,.35);
+    background: linear-gradient(180deg, rgba(120, 210, 140, 0.9) 0%, rgba(60, 160, 100, 0.95) 100%);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55);
   }
-
   .cell.preview-bad {
-    background: linear-gradient(180deg, #ff8080 0%, #d04040 45%, #902020 100%);
-    box-shadow:
-      0 0 0 1px #d04040,
-      0 0 12px rgba(255, 80, 80, .55),
-      inset 0 1px 0 rgba(255,255,255,.3);
+    background: linear-gradient(180deg, rgba(240, 130, 130, 0.9) 0%, rgba(200, 70, 70, 0.95) 100%);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
   }
 
   .status {
-    min-height: 28px;
-    font-size: 14.5px;
-    font-weight: 600;
-    letter-spacing: .3px;
+    min-height: 24px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
     text-align: center;
-    padding: 5px 18px;
-    border-radius: 999px;
-    transition: color .2s, background .2s;
+    padding: 3px 14px;
+    border: 1px dashed var(--ink-faded);
+    background: rgba(255, 255, 255, 0.45);
+    border-radius: 3px;
+    color: var(--ink);
     white-space: nowrap;
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
-    line-height: 1.35;
+    line-height: 1.25;
+    flex: 0 0 auto;
   }
 
-  .status.you   { color: #7fe0a8; background: rgba(60, 200, 130, .1); }
-  .status.enemy { color: #ff9a8a; background: rgba(255, 100, 80, .1); }
-  .status.win   { color: #8ff0b8; background: rgba(60, 220, 140, .14); box-shadow: 0 0 24px rgba(60,220,140,.15); }
-  .status.lose  { color: #ff8f8f; background: rgba(255, 80, 80, .14); box-shadow: 0 0 24px rgba(255,80,80,.15); }
-  .status.scout { color: #ffdd77; background: rgba(255, 200, 70, .18); box-shadow: 0 0 18px rgba(255,200,70,.25); }
+  .status.you   { color: #1a6a2a; background: rgba(150, 220, 170, 0.4); border-color: #3a8a5a; }
+  .status.enemy { color: #8a2a1a; background: rgba(240, 190, 170, 0.4); border-color: #a04030; }
+  .status.win   { color: #145a20; background: rgba(150, 220, 170, 0.55); border-color: #3a8a5a; border-style: solid; }
+  .status.lose  { color: #7a1e10; background: rgba(240, 180, 160, 0.55); border-color: #a04030; border-style: solid; }
+  .status.scout { color: #6a4818; background: rgba(255, 230, 140, 0.55); border-color: #b09030; }
 
   .controls {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: 5px;
     width: 100%;
+    flex: 0 0 auto;
   }
 
   .panel {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: 5px;
     width: 100%;
   }
 
   .panel.hidden { display: none; }
 
+  .top-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
   .placement-info {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 14px;
-    flex-wrap: wrap;
-    padding: 6px 14px;
-    border-radius: 11px;
-    background: rgba(20, 55, 85, .5);
-    border: 1px solid rgba(90, 175, 230, .2);
+    gap: 10px;
+    flex-wrap: nowrap;
+    padding: 3px 10px;
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid var(--grid-line);
+    border-radius: 4px;
   }
 
   .placement-step {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
-    min-width: 84px;
+    gap: 0;
+    min-width: 66px;
   }
 
   .placement-step .label {
-    font-size: 9.5px;
+    font-family: Georgia, serif;
+    font-size: 8px;
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: #6fa8cc;
+    color: var(--ink-soft);
     font-weight: 700;
-    line-height: 1.1;
+    line-height: 1;
   }
 
   .placement-step .value {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 800;
-    color: #cfe9fb;
+    color: var(--ink);
     line-height: 1.15;
+    white-space: nowrap;
   }
 
   .orientation-badge {
     display: flex;
     align-items: center;
-    gap: 5px;
-    padding: 5px 11px;
-    border-radius: 8px;
-    background: linear-gradient(180deg, rgba(90, 200, 255, .2), rgba(50, 140, 200, .15));
-    border: 1px solid rgba(120, 210, 255, .45);
-    color: #bfe9ff;
+    gap: 4px;
+    padding: 3px 9px;
+    border: 1px solid #406090;
+    border-radius: 3px;
+    background: #dce8f0;
+    color: var(--ink);
     font-weight: 800;
-    font-size: 13px;
-    letter-spacing: .5px;
-    box-shadow: 0 0 12px rgba(90, 200, 255, .25);
-    transition: all .2s;
-    line-height: 1.15;
+    font-size: 11px;
+    letter-spacing: 0.4px;
+    box-shadow: 2px 2px 0 rgba(60, 100, 160, 0.15);
+    line-height: 1.1;
+    white-space: nowrap;
   }
 
   .orientation-badge .arrow {
-    font-size: 16px;
+    font-size: 13px;
     display: inline-block;
     transition: transform .25s ease;
   }
-
   .orientation-badge.vertical .arrow { transform: rotate(90deg); }
-
-  .hint {
-    font-size: 12.5px;
-    color: #8fb8d4;
-    text-align: center;
-    max-width: 500px;
-    line-height: 1.45;
-    padding: 0 8px;
-  }
-
-  .hint b { color: #a8d8f5; }
 
   .fleet-list {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 6px;
+    gap: 4px;
+    min-height: 16px;
   }
 
   .chip {
     display: flex;
-    gap: 2px;
-    padding: 3px;
-    border-radius: 6px;
-    background: rgba(255,255,255,.04);
-    border: 1px solid rgba(120, 190, 240, .15);
-    transition: all .18s;
+    gap: 1px;
+    padding: 1px;
+    border: 1px solid var(--grid-line);
+    background: rgba(255, 255, 255, 0.55);
+    border-radius: 2px;
+    transition: all .15s;
   }
 
   .chip .blk {
-    width: 10px; height: 10px;
-    border-radius: 3px;
-    background: #3d6f96;
+    width: 7px; height: 7px;
+    background: #b8b0a0;
+    border-radius: 1px;
   }
 
   .chip.chip-size-1 .blk { background: var(--ship1-c2); border-radius: 50%; }
@@ -394,126 +397,172 @@
   .chip.chip-size-4 .blk { background: var(--ship4-c2); }
 
   .chip.active {
-    border-color: #5ec8ff;
-    background: rgba(90, 200, 255, .18);
-    box-shadow: 0 0 14px rgba(90, 200, 255, .4);
-    transform: translateY(-2px) scale(1.05);
-    animation: pulse 1.6s ease-in-out infinite;
+    border-color: var(--grid-frame);
+    border-width: 2px;
+    background: #e0e8f0;
+    animation: chipPulse 1.6s ease-in-out infinite;
   }
 
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 14px rgba(90, 200, 255, .4); }
-    50%      { box-shadow: 0 0 22px rgba(90, 200, 255, .7); }
+  @keyframes chipPulse {
+    0%, 100% { box-shadow: 0 0 0 rgba(60, 100, 160, 0); }
+    50%      { box-shadow: 0 0 8px rgba(60, 100, 160, 0.5); }
   }
 
-  .chip.done { opacity: .25; }
+  .chip.done { opacity: .28; }
 
-  .btns { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .action-bar {
+    display: flex;
+    gap: 6px;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    padding: 5px 8px;
+    background: rgba(255, 255, 255, 0.6);
+    border: 2px solid var(--grid-frame);
+    border-radius: 5px;
+    box-shadow:
+      2px 2px 0 rgba(60, 100, 160, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  }
 
-  /* Нижний ряд кнопок — фиксированной высоты, чтобы layout не прыгал */
   .btns-bottom {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    min-height: 42px;
+    min-height: 34px;
   }
 
   button {
-    font-family: inherit;
-    font-size: 13.5px;
-    font-weight: 700;
-    letter-spacing: .3px;
-    padding: 10px 16px;
-    border-radius: 9px;
-    border: 1px solid rgba(110, 190, 245, .3);
-    background: linear-gradient(180deg, rgba(40, 95, 140, .8), rgba(20, 55, 85, .9));
-    color: #cfe9fb;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    padding: 7px 14px;
+    border: 2px solid var(--grid-frame);
+    background: var(--paper-input);
+    color: var(--ink);
     cursor: pointer;
-    transition: background .15s, border-color .15s, box-shadow .15s, transform .1s;
-    min-height: 40px;
+    transition: all .12s;
+    min-height: 34px;
     touch-action: manipulation;
     line-height: 1.1;
+    border-radius: 3px;
+    box-shadow:
+      2px 2px 0 rgba(60, 100, 160, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.7);
     white-space: nowrap;
+    text-transform: uppercase;
   }
 
   button:active {
-    transform: scale(.96);
-    background: linear-gradient(180deg, rgba(55, 125, 180, .95), rgba(28, 72, 110, 1));
+    transform: translate(2px, 2px);
+    box-shadow:
+      0 0 0 rgba(60, 100, 160, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    background: #f0e8ce;
   }
 
   @media (hover: hover) and (pointer: fine) {
     button:hover {
-      background: linear-gradient(180deg, rgba(55, 125, 180, .9), rgba(28, 72, 110, .95));
-      border-color: rgba(120, 210, 255, .55);
-      box-shadow: 0 0 16px rgba(80, 180, 255, .28);
+      background: #fffdf5;
+      box-shadow:
+        3px 3px 0 rgba(60, 100, 160, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
     }
   }
 
   #rotateBtn {
-    border-color: rgba(120, 210, 255, .55);
-    background: linear-gradient(180deg, rgba(50, 130, 190, .9), rgba(28, 80, 130, .95));
-    color: #e0f4ff;
-    min-width: 130px;
+    background: linear-gradient(180deg, #d8e8f4 0%, #b8d0e8 100%);
+    border-color: #2a4a70;
+    color: #0a2a50;
+    min-width: 118px;
+    font-size: 12.5px;
   }
+  #rotateBtn:hover { background: linear-gradient(180deg, #e4eef8 0%, #c4d8ec 100%); }
 
-  /* Кнопка разведки — ФИКСИРОВАННАЯ ширина, чтобы layout не прыгал */
+  #randomBtn {
+    background: linear-gradient(180deg, #d8ecd8 0%, #b4d8b4 100%);
+    border-color: #2a6030;
+    color: #0a4018;
+    min-width: 110px;
+    font-size: 12.5px;
+  }
+  #randomBtn:hover { background: linear-gradient(180deg, #e4f4e4 0%, #c4e0c4 100%); }
+
+  #clearBtn {
+    background: linear-gradient(180deg, #f4dcd8 0%, #e8b8b0 100%);
+    border-color: #803020;
+    color: #601810;
+    min-width: 105px;
+    font-size: 12.5px;
+  }
+  #clearBtn:hover { background: linear-gradient(180deg, #f8e4e0 0%, #ecc4bc 100%); }
+
   #scoutBtn {
-    border-color: rgba(255, 210, 130, .55);
-    background: linear-gradient(180deg, rgba(200, 150, 55, .9), rgba(140, 95, 25, .95));
-    color: #ffe8b8;
-    text-shadow: 0 1px 2px rgba(0,0,0,.3);
-    box-shadow: 0 0 14px rgba(255, 200, 100, .3);
+    background: linear-gradient(180deg, #ffe8a8 0%, #f0c860 100%);
+    border-color: #8a6018;
+    color: #5a3808;
+    box-shadow:
+      2px 2px 0 rgba(140, 100, 40, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.7);
     animation: scoutGlow 2s ease-in-out infinite;
-    min-width: 250px;
-    justify-content: center;
+    min-width: 200px;
     text-align: center;
+    font-size: 12px;
   }
 
   @keyframes scoutGlow {
-    0%, 100% { box-shadow: 0 0 14px rgba(255, 200, 100, .3); }
-    50%      { box-shadow: 0 0 22px rgba(255, 200, 100, .5); }
+    0%, 100% {
+      box-shadow:
+        2px 2px 0 rgba(140, 100, 40, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7),
+        0 0 0 rgba(200, 160, 60, 0);
+    }
+    50% {
+      box-shadow:
+        2px 2px 0 rgba(140, 100, 40, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7),
+        0 0 18px rgba(200, 160, 60, 0.7);
+    }
   }
 
-  #scoutBtn:hover {
-    background: linear-gradient(180deg, rgba(230, 180, 70, .95), rgba(165, 115, 35, 1));
-    border-color: rgba(255, 225, 150, .8);
-    box-shadow: 0 0 20px rgba(255, 200, 100, .55);
-  }
+  #scoutBtn:hover { background: linear-gradient(180deg, #fff0b8 0%, #f4d070 100%); }
 
   #scoutBtn.cooldown {
-    opacity: .7;
-    filter: grayscale(.3);
+    background: #d8d0b0;
+    border-color: #8a8068;
+    color: #6a6458;
     cursor: wait;
-    background: linear-gradient(180deg, rgba(120, 100, 60, .8), rgba(85, 65, 30, .9));
-    border-color: rgba(180, 150, 90, .4);
-    box-shadow: none;
     animation: none;
-    color: #d8c9a8;
+    opacity: 0.75;
+    box-shadow: 1px 1px 0 rgba(60, 100, 160, 0.15);
   }
-
-  #scoutBtn.cooldown:hover { transform: none; box-shadow: none; }
+  #scoutBtn.cooldown:hover { transform: none; background: #d8d0b0; }
 
   #newGameBtn {
-    border-color: rgba(120, 255, 190, .3);
-    background: linear-gradient(180deg, rgba(30, 110, 85, .75), rgba(15, 65, 50, .85));
-    color: #c8f7e2;
-    min-width: 130px;
+    background: linear-gradient(180deg, #e8e0d0 0%, #d0c8b0 100%);
+    border-color: #6a5a40;
+    color: #3a2a10;
+    min-width: 110px;
+    font-size: 12px;
   }
+  #newGameBtn:hover { background: linear-gradient(180deg, #f0e8dc 0%, #d8d0bc 100%); }
 
+  /* Overlays */
   .overlay {
     position: fixed;
     inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(3, 10, 18, .94);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(240, 232, 205, 0.92);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     z-index: 100;
-    padding: calc(16px + var(--safe-top)) calc(16px + var(--safe-right))
-             calc(16px + var(--safe-bottom)) calc(16px + var(--safe-left));
+    padding: calc(20px + var(--safe-top)) calc(16px + var(--safe-right))
+             calc(20px + var(--safe-bottom)) calc(16px + var(--safe-left));
     touch-action: none;
   }
 
@@ -525,16 +574,28 @@
     gap: 14px;
     align-items: center;
     text-align: center;
-    max-width: 380px;
+    max-width: 400px;
     width: 100%;
-    padding: 30px 24px;
-    border-radius: 18px;
-    background: linear-gradient(180deg, rgba(15, 40, 62, .98), rgba(8, 22, 36, .98));
-    border: 1px solid rgba(90, 175, 230, .22);
+    padding: 32px 26px;
+    border: 2px solid var(--grid-frame);
+    border-radius: 4px;
+    background: var(--paper-board);
     box-shadow:
-      0 24px 70px rgba(0,0,0,.75),
-      inset 0 0 40px rgba(60, 150, 210, .05);
+      8px 8px 0 rgba(60, 100, 160, 0.2),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.6);
     animation: pop .25s ease;
+    position: relative;
+  }
+
+  .overlay-box::before {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border: 1px dashed var(--ink-faded);
+    border-radius: 6px;
+    pointer-events: none;
+    z-index: -1;
+    transform: rotate(-0.6deg);
   }
 
   @keyframes pop {
@@ -544,31 +605,34 @@
 
   .overlay-box h1 {
     margin: 0 0 6px;
+    font-family: Georgia, 'Times New Roman', serif;
     font-size: clamp(22px, 5.5vw, 28px);
     letter-spacing: 3px;
     text-transform: uppercase;
-    font-weight: 800;
-    background: linear-gradient(180deg, #bfe9ff, #4d9dc9);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    font-weight: 700;
+    color: var(--ink);
     line-height: 1.15;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--ink);
   }
 
   .overlay-box h2 {
     margin: 0;
+    font-family: Georgia, serif;
     font-size: clamp(18px, 4.5vw, 22px);
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: #a8d8f5;
+    color: var(--ink);
     line-height: 1.2;
   }
 
   .overlay-box p {
     margin: 0;
-    color: #7fa8c4;
+    font-family: Georgia, serif;
+    color: var(--ink-soft);
     font-size: 13.5px;
-    line-height: 1.5;
+    line-height: 1.55;
+    font-style: italic;
   }
 
   .menu-btn {
@@ -576,8 +640,8 @@
     padding: 14px 16px;
     font-size: 14.5px;
     font-weight: 700;
-    letter-spacing: .6px;
-    border-radius: 12px;
+    letter-spacing: 0.6px;
+    border-radius: 3px;
     min-height: 52px;
     white-space: normal;
     line-height: 1.3;
@@ -585,30 +649,133 @@
 
   .menu-btn .sub {
     display: block;
+    font-family: Georgia, serif;
     font-size: 11px;
     font-weight: 500;
-    letter-spacing: .4px;
-    opacity: .6;
+    letter-spacing: 0.4px;
+    opacity: 0.7;
     margin-top: 3px;
     text-transform: none;
+    font-style: italic;
   }
 
-  .menu-btn.bot {
-    border-color: rgba(100, 190, 255, .35);
-    background: linear-gradient(180deg, rgba(35, 90, 140, .8), rgba(18, 50, 80, .9));
-  }
-
-  .menu-btn.duo {
-    border-color: rgba(255, 190, 100, .35);
-    background: linear-gradient(180deg, rgba(140, 90, 35, .8), rgba(80, 50, 18, .9));
-    color: #ffe3b8;
-  }
+  .menu-btn.bot { background: #dce8f0; border-color: #406090; color: var(--ink); }
+  .menu-btn.duo { background: #f0e0c8; border-color: #906830; color: #5a3818; }
 
   .overlay-box .icon {
-    font-size: 40px;
+    font-size: 44px;
     line-height: 1;
-    margin-bottom: 2px;
-    filter: drop-shadow(0 6px 18px rgba(80, 180, 255, .3));
+    margin-bottom: 4px;
+    filter: drop-shadow(2px 2px 0 rgba(60, 100, 160, 0.2));
+  }
+
+  /* ============================================================
+     БАЗОВЫЙ ШИРОКОФОРМАТНЫЙ РЕЖИМ (расстановка)
+     ============================================================ */
+  @media (min-aspect-ratio: 16/10) and (min-height: 450px) {
+    :root { --cell: min(4.8vh, 3vw, 50px); }
+
+    body { padding: 6px 10px; }
+    .game { gap: 4px; }
+
+    .main-title {
+      font-size: clamp(13px, 1.1vw, 20px);
+      letter-spacing: 2px;
+      padding-bottom: 1px;
+      border-bottom-width: 1px;
+    }
+
+    .boards { gap: clamp(14px, 2vw, 32px); }
+    .board-wrap { gap: 3px; }
+    .board-title {
+      font-size: 9px;
+      letter-spacing: 1px;
+      min-height: 11px;
+      padding-bottom: 0;
+    }
+
+    .status {
+      min-height: 20px;
+      font-size: 11px;
+      padding: 2px 12px;
+      letter-spacing: 0.5px;
+    }
+
+    .controls { gap: 3px; }
+    .panel { gap: 3px; }
+
+    .top-row { gap: 8px; }
+
+    .placement-info { padding: 2px 8px; gap: 8px; }
+    .placement-step { min-width: 56px; }
+    .placement-step .label { font-size: 7px; letter-spacing: 0.8px; }
+    .placement-step .value { font-size: 10px; }
+    .orientation-badge { padding: 2px 7px; font-size: 10px; }
+    .orientation-badge .arrow { font-size: 11px; }
+
+    .hint { display: none; }
+
+    .fleet-list { gap: 3px; min-height: 14px; }
+    .chip { padding: 1px; }
+    .chip .blk { width: 6px; height: 6px; }
+
+    .action-bar {
+      padding: 4px 8px;
+      gap: 6px;
+      border-width: 2px;
+      box-shadow:
+        2px 2px 0 rgba(60, 100, 160, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    }
+
+    button {
+      padding: 6px 12px;
+      font-size: 11px;
+      min-height: 30px;
+      border-width: 2px;
+      box-shadow:
+        2px 2px 0 rgba(60, 100, 160, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    }
+
+    #rotateBtn { min-width: 100px; font-size: 11.5px; }
+    #randomBtn { min-width: 95px; font-size: 11.5px; }
+    #clearBtn { min-width: 90px; font-size: 11.5px; }
+
+    .btns-bottom { gap: 6px; min-height: 30px; }
+    #scoutBtn { min-width: 180px; font-size: 11px; padding: 6px 12px; min-height: 30px; }
+    #newGameBtn { min-width: 100px; font-size: 11px; padding: 6px 12px; min-height: 30px; }
+  }
+
+  @media (min-aspect-ratio: 16/10) and (max-height: 620px) {
+    .main-title { display: none; }
+  }
+
+  @media (min-aspect-ratio: 21/10) and (min-height: 450px) {
+    :root { --cell: min(4.9vh, 2.8vw, 54px); }
+  }
+
+  /* ============================================================
+     BATTLE-MODE — БОЛЬШОЕ ПОЛЕ, КОГДА ПАНЕЛЬ РАССТАНОВКИ СКРЫТА
+     ============================================================ */
+  @media (min-aspect-ratio: 16/10) and (min-height: 450px) {
+    body.battle-mode { --cell: min(6.8vh, 4.2vw, 72px); }
+
+    body.battle-mode .boards { gap: clamp(18px, 2.6vw, 44px); }
+    body.battle-mode .board-title { font-size: 11px; letter-spacing: 1.4px; }
+  }
+
+  @media (min-aspect-ratio: 21/10) and (min-height: 450px) {
+    body.battle-mode { --cell: min(7vh, 3.6vw, 78px); }
+  }
+
+  /* На средних экранах (когда места не очень много) — умеренно увеличиваем */
+  @media (min-aspect-ratio: 16/10) and (max-height: 700px) {
+    body.battle-mode { --cell: min(6.4vh, 4vw, 64px); }
+  }
+
+  @media (min-aspect-ratio: 16/10) and (max-height: 560px) {
+    body.battle-mode { --cell: min(6vh, 4vw, 56px); }
   }
 
   /* ============================================================
@@ -616,61 +783,75 @@
      ============================================================ */
   @media (max-aspect-ratio: 4/3) {
     :root { --cell: min(8vw, 8vh, 40px); }
-
-    .game { gap: 10px; }
-
-    .boards {
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-    }
-
+    .game { gap: 8px; }
+    .boards { flex-direction: column; align-items: center; gap: 10px; flex-wrap: wrap; }
     .main-title { letter-spacing: 2px; }
+    .placement-info { gap: 8px; padding: 4px 10px; }
+    .placement-step { min-width: 70px; }
+    .placement-step .label { font-size: 8.5px; }
+    .placement-step .value { font-size: 12.5px; }
+    .orientation-badge { font-size: 12px; padding: 4px 10px; }
 
-    .placement-info { gap: 10px; padding: 5px 12px; }
-    .placement-step { min-width: 76px; }
+    .action-bar { gap: 8px; padding: 6px 10px; flex-wrap: wrap; }
 
-    button { font-size: 12.5px; padding: 9px 14px; min-height: 38px; }
-    #scoutBtn { min-width: 220px; }
+    button { font-size: 12.5px; padding: 9px 14px; min-height: 40px; }
+    #rotateBtn { min-width: 110px; }
+    #randomBtn { min-width: 105px; }
+    #clearBtn { min-width: 100px; }
+    #scoutBtn { min-width: 200px; font-size: 12px; }
+    #newGameBtn { min-width: 110px; }
+
+    /* В бою на мобильном — одно поле, значит можно заметно крупнее */
+    body.battle-mode { --cell: min(11vw, 9vh, 56px); }
   }
 
   @media (max-width: 480px) {
     :root { --cell: min(8.8vw, 8.8vh, 36px); }
-    body { padding: calc(8px + var(--safe-top)) calc(8px + var(--safe-right))
-                  calc(14px + var(--safe-bottom)) calc(8px + var(--safe-left)); }
-    .grid { padding: 4px; gap: 1.5px; }
-    .main-title { font-size: 20px; }
-    .overlay-box { padding: 22px 16px; }
-    .hint { font-size: 11px; }
-    .orientation-badge { font-size: 12px; padding: 4px 9px; }
-    #scoutBtn { min-width: 200px; font-size: 12px; }
-    #newGameBtn { min-width: 110px; }
+    body { padding: calc(8px + var(--safe-top)) calc(6px + var(--safe-right))
+                  calc(10px + var(--safe-bottom)) calc(6px + var(--safe-left)); }
+    .main-title { font-size: 18px; }
+    .overlay-box { padding: 24px 18px; }
+    .hint { font-size: 10.5px; }
+
+    .action-bar { gap: 5px; padding: 6px 8px; }
+    button { font-size: 11.5px; padding: 8px 10px; min-height: 38px; }
+    #rotateBtn { min-width: 95px; }
+    #randomBtn { min-width: 90px; }
+    #clearBtn { min-width: 85px; }
+    #scoutBtn { min-width: 170px; font-size: 11.5px; }
+    #newGameBtn { min-width: 95px; }
+
+    body.battle-mode { --cell: min(11.5vw, 9.5vh, 52px); }
   }
 
-  /* ============================================================
-     ЛАНДШАФТ ТЕЛЕФОНА
-     ============================================================ */
+  /* Ландшафт телефона */
   @media (max-height: 520px) and (orientation: landscape) {
-    :root { --cell: min(7vh, 7vw, 38px); }
-    body { padding: 6px 10px; }
+    :root { --cell: min(6.2vh, 6vw, 34px); }
+    body { padding: 4px 8px; }
     .main-title { display: none; }
-    .game { gap: 6px; }
-    .boards { gap: 14px; }
-    .board-title { font-size: 9px; letter-spacing: 1px; }
-    .grid { padding: 4px; gap: 1.5px; }
-    .status { font-size: 12px; padding: 3px 14px; min-height: 22px; }
-    .controls { gap: 6px; }
-    .panel { gap: 6px; }
-    .placement-info { padding: 3px 10px; gap: 10px; }
-    .placement-step { min-width: 64px; }
-    .placement-step .label { font-size: 8px; }
-    .placement-step .value { font-size: 11.5px; }
-    .orientation-badge { padding: 3px 9px; font-size: 11px; }
-    .orientation-badge .arrow { font-size: 12px; }
-    .hint { font-size: 10px; margin-top: -2px; }
-    button { font-size: 11.5px; padding: 7px 12px; min-height: 32px; }
-    #scoutBtn { min-width: 190px; }
-    #newGameBtn { min-width: 100px; }
+    .game { gap: 3px; }
+    .boards { gap: 12px; }
+    .board-title { font-size: 8px; letter-spacing: 0.8px; min-height: 10px; }
+    .status { font-size: 10.5px; padding: 2px 10px; min-height: 18px; }
+    .controls { gap: 3px; }
+    .panel { gap: 3px; }
+    .placement-info { padding: 2px 8px; gap: 8px; }
+    .placement-step { min-width: 52px; }
+    .placement-step .label { font-size: 7px; }
+    .placement-step .value { font-size: 10px; }
+    .orientation-badge { padding: 2px 7px; font-size: 10px; }
+    .orientation-badge .arrow { font-size: 11px; }
+    .hint { display: none; }
+
+    .action-bar { padding: 4px 8px; gap: 6px; }
+    button { font-size: 10.5px; padding: 5px 10px; min-height: 28px; border-width: 2px; }
+    #rotateBtn { min-width: 92px; }
+    #randomBtn { min-width: 88px; }
+    #clearBtn { min-width: 82px; }
+    #scoutBtn { min-width: 170px; font-size: 10.5px; }
+    #newGameBtn { min-width: 92px; }
+
+    body.battle-mode { --cell: min(7.8vh, 7vw, 46px); }
   }
 
   .grid, .cell {
@@ -700,31 +881,32 @@
 
   <div class="controls">
     <div class="panel" id="placementPanel">
-      <div class="placement-info">
-        <div class="placement-step">
-          <span class="label" data-i18n="shipLabel">Корабль</span>
-          <span class="value" id="shipSizeLabel">Линкор</span>
+      <div class="top-row">
+        <div class="placement-info">
+          <div class="placement-step">
+            <span class="label" data-i18n="shipLabel">Корабль</span>
+            <span class="value" id="shipSizeLabel">Линкор</span>
+          </div>
+
+          <div class="orientation-badge" id="orientationBadge">
+            <span class="arrow" id="orientationArrow">→</span>
+            <span id="orientationText" data-i18n="horizontal">Горизонтально</span>
+          </div>
+
+          <div class="placement-step">
+            <span class="label" data-i18n="leftLabel">Осталось</span>
+            <span class="value" id="shipsLeftLabel">10</span>
+          </div>
         </div>
 
-        <div class="orientation-badge" id="orientationBadge">
-          <span class="arrow" id="orientationArrow">→</span>
-          <span id="orientationText" data-i18n="horizontal">Горизонтально</span>
-        </div>
-
-        <div class="placement-step">
-          <span class="label" data-i18n="leftLabel">Осталось</span>
-          <span class="value" id="shipsLeftLabel">10</span>
-        </div>
+        <div class="fleet-list" id="fleetList"></div>
       </div>
 
       <div class="hint" data-i18n-html="placeHint">
         <b>Тапните по своему полю</b> — корабль встанет в эту клетку.
-        Кнопка <b>«Повернуть»</b> меняет направление.
       </div>
 
-      <div class="fleet-list" id="fleetList"></div>
-
-      <div class="btns">
+      <div class="action-bar">
         <button id="rotateBtn" data-i18n="rotate">⟳ Повернуть</button>
         <button id="randomBtn" data-i18n="random">🎲 Случайно</button>
         <button id="clearBtn" data-i18n="clear">✕ Очистить</button>
@@ -732,7 +914,7 @@
     </div>
 
     <div class="btns-bottom">
-      <button id="scoutBtn" style="display:none" data-i18n="scout">📺 Разведка — найти корабль</button>
+      <button id="scoutBtn" style="display:none" data-i18n="scout">📺 Разведка</button>
       <button id="newGameBtn" data-i18n="backToMenu">← В меню</button>
     </div>
   </div>
@@ -768,137 +950,77 @@
 (() => {
   'use strict';
 
-  // ============================================================
-  //  ЛОКАЛИЗАЦИЯ
-  // ============================================================
   const TRANSLATIONS = {
     ru: {
       title: 'Морской бой',
-      menuBot: '🤖 Игра с ботом',
-      menuBotSub: 'Против компьютера',
-      menuDuo: '👥 Игра на двоих',
-      menuDuoSub: 'По очереди на одном устройстве',
-      shipLabel: 'Корабль',
-      leftLabel: 'Осталось',
-      horizontal: 'Горизонтально',
-      vertical: 'Вертикально',
-      ship4: 'Линкор',
-      ship3: 'Крейсер',
-      ship2: 'Эсминец',
-      ship1: 'Катер',
-      rotate: '⟳ Повернуть',
-      random: '🎲 Случайно',
-      clear: '✕ Очистить',
+      menuBot: '🤖 Игра с ботом', menuBotSub: 'Против компьютера',
+      menuDuo: '👥 Игра на двоих', menuDuoSub: 'По очереди на одном устройстве',
+      shipLabel: 'Корабль', leftLabel: 'Осталось',
+      horizontal: 'Горизонтально', vertical: 'Вертикально',
+      ship4: 'Линкор', ship3: 'Крейсер', ship2: 'Эсминец', ship1: 'Катер',
+      rotate: '⟳ Повернуть', random: '🎲 Случайно', clear: '✕ Очистить',
       backToMenu: '← В меню',
-      scout: '📺 Разведка — найти корабль',
-      scoutCooling: '⏳ Разведка {n}с',
-      scoutLoading: '⏳ Загрузка...',
-      scoutFound: '🎯 Разведка: цель найдена!',
-      scoutNoTarget: '🔍 Больше нечего разведывать',
-      placeHint: '<b>Тапните по своему полю</b> — корабль встанет в эту клетку. Кнопка <b>«Повернуть»</b> меняет направление.',
-      statusLeft: 'Осталось: {n}',
-      statusReady: 'Готово',
-      statusYourTurn: 'Ваш ход',
-      statusEnemyTurn: 'Противник...',
-      statusTurn: 'Ход игрока {n}',
-      win: '🎉 Победа!',
-      lose: '💥 Поражение',
-      playerWin: '🎉 Победил игрок {n}!',
+      scout: '📺 Разведка', scoutCooling: '⏳ {n}с', scoutLoading: '⏳ ...',
+      scoutFound: '🎯 Разведка: цель найдена!', scoutNoTarget: '🔍 Больше нечего разведывать',
+      placeHint: '<b>Тапните по своему полю</b> — корабль встанет в эту клетку.',
+      statusLeft: 'Осталось: {n}', statusReady: 'Готово',
+      statusYourTurn: 'Ваш ход', statusEnemyTurn: 'Противник...', statusTurn: 'Ход игрока {n}',
+      win: '🎉 Победа!', lose: '💥 Поражение', playerWin: '🎉 Победил игрок {n}!',
       passTitle: 'Игрок {n}',
       passPlacement: 'Игрок {n} расставил корабли. Передайте устройство игроку {n2}.',
       passMiss: 'Игрок {n} промахнулся. Передайте устройство.',
       passReady: 'Оба флота готовы. Начинает игрок {n}.',
       ready: 'Готов',
-      yourFleet: 'Ваш флот',
-      enemyFleet: 'Флот противника',
-      playerField: 'Игрок {n} — своё поле',
-      enemyField: 'Игрок {n} — поле противника',
+      yourFleet: 'Ваш флот', enemyFleet: 'Флот противника',
+      playerField: 'Игрок {n} — своё поле', enemyField: 'Игрок {n} — поле противника',
       playerPrefix: 'Игрок {n} · '
     },
     en: {
       title: 'Battleship',
-      menuBot: '🤖 Play vs Bot',
-      menuBotSub: 'Against computer',
-      menuDuo: '👥 Two Players',
-      menuDuoSub: 'Take turns on one device',
-      shipLabel: 'Ship',
-      leftLabel: 'Left',
-      horizontal: 'Horizontal',
-      vertical: 'Vertical',
-      ship4: 'Battleship',
-      ship3: 'Cruiser',
-      ship2: 'Destroyer',
-      ship1: 'Boat',
-      rotate: '⟳ Rotate',
-      random: '🎲 Random',
-      clear: '✕ Clear',
+      menuBot: '🤖 Play vs Bot', menuBotSub: 'Against computer',
+      menuDuo: '👥 Two Players', menuDuoSub: 'Take turns on one device',
+      shipLabel: 'Ship', leftLabel: 'Left',
+      horizontal: 'Horizontal', vertical: 'Vertical',
+      ship4: 'Battleship', ship3: 'Cruiser', ship2: 'Destroyer', ship1: 'Boat',
+      rotate: '⟳ Rotate', random: '🎲 Random', clear: '✕ Clear',
       backToMenu: '← Menu',
-      scout: '📺 Scout — find ship',
-      scoutCooling: '⏳ Scout {n}s',
-      scoutLoading: '⏳ Loading...',
-      scoutFound: '🎯 Scout: target found!',
-      scoutNoTarget: '🔍 Nothing to scout',
-      placeHint: '<b>Tap your field</b> to place a ship. The <b>Rotate</b> button changes direction.',
-      statusLeft: 'Left: {n}',
-      statusReady: 'Ready',
-      statusYourTurn: 'Your turn',
-      statusEnemyTurn: 'Opponent...',
-      statusTurn: "Player {n}'s turn",
-      win: '🎉 Victory!',
-      lose: '💥 Defeat',
-      playerWin: '🎉 Player {n} wins!',
+      scout: '📺 Scout', scoutCooling: '⏳ {n}s', scoutLoading: '⏳ ...',
+      scoutFound: '🎯 Scout: found!', scoutNoTarget: '🔍 Nothing to scout',
+      placeHint: '<b>Tap your field</b> to place a ship.',
+      statusLeft: 'Left: {n}', statusReady: 'Ready',
+      statusYourTurn: 'Your turn', statusEnemyTurn: 'Opponent...', statusTurn: "Player {n}'s turn",
+      win: '🎉 Victory!', lose: '💥 Defeat', playerWin: '🎉 Player {n} wins!',
       passTitle: 'Player {n}',
-      passPlacement: 'Player {n} placed ships. Pass the device to player {n2}.',
+      passPlacement: 'Player {n} placed ships. Pass to player {n2}.',
       passMiss: 'Player {n} missed. Pass the device.',
-      passReady: 'Both fleets ready. Player {n} starts.',
+      passReady: 'Both ready. Player {n} starts.',
       ready: 'Ready',
-      yourFleet: 'Your fleet',
-      enemyFleet: 'Enemy fleet',
-      playerField: 'Player {n} — own field',
-      enemyField: 'Player {n} — enemy field',
+      yourFleet: 'Your fleet', enemyFleet: 'Enemy fleet',
+      playerField: 'Player {n} — own field', enemyField: 'Player {n} — enemy field',
       playerPrefix: 'Player {n} · '
     },
     tr: {
       title: 'Amiral Battı',
-      menuBot: '🤖 Botla Oyna',
-      menuBotSub: 'Bilgisayara karşı',
-      menuDuo: '👥 İki Kişilik',
-      menuDuoSub: 'Tek cihazda sırayla',
-      shipLabel: 'Gemi',
-      leftLabel: 'Kalan',
-      horizontal: 'Yatay',
-      vertical: 'Dikey',
-      ship4: 'Zırhlı',
-      ship3: 'Kruvazör',
-      ship2: 'Muhrip',
-      ship1: 'Bot',
-      rotate: '⟳ Döndür',
-      random: '🎲 Rastgele',
-      clear: '✕ Temizle',
+      menuBot: '🤖 Botla Oyna', menuBotSub: 'Bilgisayara karşı',
+      menuDuo: '👥 İki Kişilik', menuDuoSub: 'Tek cihazda sırayla',
+      shipLabel: 'Gemi', leftLabel: 'Kalan',
+      horizontal: 'Yatay', vertical: 'Dikey',
+      ship4: 'Zırhlı', ship3: 'Kruvazör', ship2: 'Muhrip', ship1: 'Bot',
+      rotate: '⟳ Döndür', random: '🎲 Rastgele', clear: '✕ Temizle',
       backToMenu: '← Menü',
-      scout: '📺 Keşif — gemi bul',
-      scoutCooling: '⏳ Keşif {n}sn',
-      scoutLoading: '⏳ Yükleniyor...',
-      scoutFound: '🎯 Keşif: hedef bulundu!',
-      scoutNoTarget: '🔍 Keşfedilecek bir şey yok',
-      placeHint: '<b>Kendi alanına dokun</b> — gemi buraya yerleşir. <b>Döndür</b> düğmesi yönü değiştirir.',
-      statusLeft: 'Kalan: {n}',
-      statusReady: 'Hazır',
-      statusYourTurn: 'Sıra sende',
-      statusEnemyTurn: 'Rakip...',
-      statusTurn: 'Oyuncu {n} sırası',
-      win: '🎉 Zafer!',
-      lose: '💥 Yenilgi',
-      playerWin: '🎉 Oyuncu {n} kazandı!',
+      scout: '📺 Keşif', scoutCooling: '⏳ {n}sn', scoutLoading: '⏳ ...',
+      scoutFound: '🎯 Keşif: bulundu!', scoutNoTarget: '🔍 Keşfedilecek yok',
+      placeHint: '<b>Kendi alanına dokun</b> — gemi buraya yerleşir.',
+      statusLeft: 'Kalan: {n}', statusReady: 'Hazır',
+      statusYourTurn: 'Sıra sende', statusEnemyTurn: 'Rakip...', statusTurn: 'Oyuncu {n} sırası',
+      win: '🎉 Zafer!', lose: '💥 Yenilgi', playerWin: '🎉 Oyuncu {n} kazandı!',
       passTitle: 'Oyuncu {n}',
-      passPlacement: 'Oyuncu {n} gemilerini yerleştirdi. Cihazı oyuncu {n2} verin.',
+      passPlacement: 'Oyuncu {n} hazır. Cihazı oyuncu {n2} verin.',
       passMiss: 'Oyuncu {n} ıskaladı. Cihazı verin.',
-      passReady: 'İki filo da hazır. Oyuncu {n} başlıyor.',
+      passReady: 'İki filo hazır. Oyuncu {n} başlıyor.',
       ready: 'Hazır',
-      yourFleet: 'Kendi filon',
-      enemyFleet: 'Düşman filosu',
-      playerField: 'Oyuncu {n} — kendi alanı',
-      enemyField: 'Oyuncu {n} — düşman alanı',
+      yourFleet: 'Kendi filon', enemyFleet: 'Düşman filosu',
+      playerField: 'Oyuncu {n} — kendi alanı', enemyField: 'Oyuncu {n} — düşman alanı',
       playerPrefix: 'Oyuncu {n} · '
     }
   };
@@ -908,26 +1030,13 @@
   function t(key, params) {
     const dict = TRANSLATIONS[LANG] || TRANSLATIONS.ru;
     let str = dict[key] || (TRANSLATIONS.ru[key] || key);
-    if (params) {
-      for (const k in params) {
-        str = str.replace(new RegExp('\\{' + k + '\\}', 'g'), params[k]);
-      }
-    }
+    if (params) for (const k in params) str = str.replace(new RegExp('\\{' + k + '\\}', 'g'), params[k]);
     return str;
   }
 
   function applyTranslations() {
-    // data-i18n → textContent
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-      const key = el.dataset.i18n;
-      el.textContent = t(key);
-    });
-    // data-i18n-html → innerHTML
-    document.querySelectorAll('[data-i18n-html]').forEach(el => {
-      const key = el.dataset.i18nHtml;
-      el.innerHTML = t(key);
-    });
-    // Обновляем динамические тексты, если игра уже идёт
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
     if (typeof phase !== 'undefined') {
       if (phase === 'placement') renderPlacementInfo();
       if (phase === 'battle') updateStatus();
@@ -940,103 +1049,62 @@
     if (lang.startsWith('tr')) return 'tr';
     if (lang.startsWith('en')) return 'en';
     if (lang.startsWith('ru')) return 'ru';
-    return 'en'; // по умолчанию английский для всех остальных
+    return 'en';
   }
 
-  // ============================================================
-  //  YANDEX GAMES SDK
-  // ============================================================
   let ysdk = null;
   let lastAdTime = 0;
   const MIN_AD_INTERVAL = 60000;
   const SCOUT_COOLDOWN_MS = 60000;
 
   function initYandexSDK() {
-    // Пока SDK грузится — ставим язык из браузера
     LANG = detectLocalLang();
-
-    if (typeof YaGames === 'undefined') {
-      console.warn('[YSDK] YaGames not found — running outside Yandex Games');
+    if (typeof YaGames === 'undefined') { applyTranslations(); return; }
+    YaGames.init().then(sdk => {
+      ysdk = sdk;
+      try {
+        const yandexLang = ysdk.environment.i18n.lang;
+        if (yandexLang === 'ru' || yandexLang === 'en' || yandexLang === 'tr') LANG = yandexLang;
+        else if (yandexLang) LANG = 'en';
+      } catch (e) {}
       applyTranslations();
-      return;
-    }
-
-    YaGames.init()
-      .then(sdk => {
-        ysdk = sdk;
-        console.log('[YSDK] Initialized');
-
-        // Определяем язык из окружения Яндекса
-        try {
-          const yandexLang = ysdk.environment.i18n.lang;
-          console.log('[YSDK] Language:', yandexLang);
-          if (yandexLang === 'ru' || yandexLang === 'en' || yandexLang === 'tr') {
-            LANG = yandexLang;
-          } else if (yandexLang) {
-            LANG = 'en'; // для остальных — английский
-          }
-        } catch (e) {
-          console.warn('[YSDK] Could not detect lang, using browser');
-        }
-
-        applyTranslations();
-        updateStatus();
-        renderAll();
-
-        ysdk.features.LoadingAPI?.ready();
-      })
-      .catch(err => {
-        console.error('[YSDK] Init failed:', err);
-        applyTranslations();
-      });
+      updateStatus();
+      renderAll();
+      ysdk.features.LoadingAPI?.ready();
+    }).catch(err => { console.error('[YSDK] Init failed:', err); applyTranslations(); });
   }
 
-  function gameplayStart() {
-    try { ysdk?.features?.GameplayAPI?.start(); } catch (e) {}
-  }
-
-  function gameplayStop() {
-    try { ysdk?.features?.GameplayAPI?.stop(); } catch (e) {}
-  }
+  function gameplayStart() { try { ysdk?.features?.GameplayAPI?.start(); } catch (e) {} }
+  function gameplayStop() { try { ysdk?.features?.GameplayAPI?.stop(); } catch (e) {} }
 
   function showFullscreenAd(callback) {
     const now = Date.now();
     if (now - lastAdTime < MIN_AD_INTERVAL) { callback?.(); return; }
     if (!ysdk) { callback?.(); return; }
-
     ysdk.adv.showFullscreenAdv({
       callbacks: {
         onClose: () => { lastAdTime = Date.now(); callback?.(); },
-        onError: (err) => { console.warn('[YSDK] Fullscreen ad error:', err); callback?.(); }
+        onError: (err) => { console.warn('[YSDK] Fullscreen error:', err); callback?.(); }
       }
     });
   }
 
   function showRewardedAd(onReward) {
-    if (!ysdk) {
-      console.log('[YSDK] No SDK — reward granted (dev mode)');
-      onReward?.();
-      return;
-    }
+    if (!ysdk) { onReward?.(); return; }
     ysdk.adv.showRewardedVideo({
       callbacks: {
         onOpen: () => { gameplayStop(); },
-        onRewarded: () => { console.log('[YSDK] Rewarded'); onReward?.(); },
+        onRewarded: () => { onReward?.(); },
         onClose: () => { if (phase === 'battle') gameplayStart(); },
-        onError: (err) => { console.warn('[YSDK] Rewarded error:', err); if (phase === 'battle') gameplayStart(); }
+        onError: () => { if (phase === 'battle') gameplayStart(); }
       }
     });
   }
 
-  // ============================================================
-  //  ИГРА
-  // ============================================================
   const SIZE = 10;
   const SHIP_CONFIG = [
-    { size: 4, count: 1 },
-    { size: 3, count: 2 },
-    { size: 2, count: 3 },
-    { size: 1, count: 4 },
+    { size: 4, count: 1 }, { size: 3, count: 2 },
+    { size: 2, count: 3 }, { size: 1, count: 4 },
   ];
 
   const playerGridEl = document.getElementById('playerGrid');
@@ -1055,7 +1123,6 @@
   const shipSizeLabel = document.getElementById('shipSizeLabel');
   const shipsLeftLabel = document.getElementById('shipsLeftLabel');
   const orientationBadge = document.getElementById('orientationBadge');
-  const orientationText = document.getElementById('orientationText');
 
   const menuEl    = document.getElementById('menu');
   const passEl    = document.getElementById('pass');
@@ -1066,21 +1133,11 @@
   document.getElementById('menuBot').addEventListener('click', () => startGame('bot'));
   document.getElementById('menuDuo').addEventListener('click', () => startGame('duo'));
 
-  let mode = null;
-  let boards = [];
-  let phase = 'menu';
-  let activePlayer = 0;
-  let playerTurn = true;
-  let busy = false;
-  let shipsToPlace = [];
-  let currentShipIdx = 0;
-  let horizontal = true;
-  let previewCells = [];
-  let previewValid = false;
-  let aiHitCells = [];
-  let scoutCooldownEnd = [0, 0];
-  let scoutTimerId = null;
-
+  let mode = null, boards = [], phase = 'menu';
+  let activePlayer = 0, playerTurn = true, busy = false;
+  let shipsToPlace = [], currentShipIdx = 0, horizontal = true;
+  let previewCells = [], previewValid = false, aiHitCells = [];
+  let scoutCooldownEnd = [0, 0], scoutTimerId = null;
   let playerCells = [], enemyCells = [];
 
   function createBoard() {
@@ -1095,15 +1152,12 @@
 
   function canPlace(board, r, c, size, horiz) {
     for (let i = 0; i < size; i++) {
-      const rr = r + (horiz ? 0 : i);
-      const cc = c + (horiz ? i : 0);
+      const rr = r + (horiz ? 0 : i), cc = c + (horiz ? i : 0);
       if (rr < 0 || cc < 0 || rr >= SIZE || cc >= SIZE) return false;
-      for (let dr = -1; dr <= 1; dr++) {
-        for (let dc = -1; dc <= 1; dc++) {
-          const nr = rr + dr, nc = cc + dc;
-          if (nr < 0 || nc < 0 || nr >= SIZE || nc >= SIZE) continue;
-          if (board.cells[nr][nc].ship) return false;
-        }
+      for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+        const nr = rr + dr, nc = cc + dc;
+        if (nr < 0 || nc < 0 || nr >= SIZE || nc >= SIZE) continue;
+        if (board.cells[nr][nc].ship) return false;
       }
     }
     return true;
@@ -1112,8 +1166,7 @@
   function placeShip(board, r, c, size, horiz) {
     const ship = { id: board.ships.length, size, cells: [], hits: 0, sunk: false };
     for (let i = 0; i < size; i++) {
-      const rr = r + (horiz ? 0 : i);
-      const cc = c + (horiz ? i : 0);
+      const rr = r + (horiz ? 0 : i), cc = c + (horiz ? i : 0);
       board.cells[rr][cc].ship = ship;
       ship.cells.push({ r: rr, c: cc });
     }
@@ -1124,80 +1177,38 @@
   function randomFill(board) {
     board.cells.forEach(row => row.forEach(cell => { cell.ship = null; cell.scouted = false; }));
     board.ships = [];
-    for (const cfg of SHIP_CONFIG) {
-      for (let n = 0; n < cfg.count; n++) {
-        let placed = false, tries = 0;
-        while (!placed && tries < 3000) {
-          const horiz = Math.random() < 0.5;
-          const r = Math.floor(Math.random() * SIZE);
-          const c = Math.floor(Math.random() * SIZE);
-          if (canPlace(board, r, c, cfg.size, horiz)) {
-            placeShip(board, r, c, cfg.size, horiz);
-            placed = true;
-          }
-          tries++;
-        }
+    for (const cfg of SHIP_CONFIG) for (let n = 0; n < cfg.count; n++) {
+      let placed = false, tries = 0;
+      while (!placed && tries < 3000) {
+        const horiz = Math.random() < 0.5;
+        const r = Math.floor(Math.random() * SIZE), c = Math.floor(Math.random() * SIZE);
+        if (canPlace(board, r, c, cfg.size, horiz)) { placeShip(board, r, c, cfg.size, horiz); placed = true; }
+        tries++;
       }
     }
   }
 
   function buildShipList() {
     const list = [];
-    SHIP_CONFIG.forEach(cfg => {
-      for (let i = 0; i < cfg.count; i++) list.push(cfg.size);
-    });
+    SHIP_CONFIG.forEach(cfg => { for (let i = 0; i < cfg.count; i++) list.push(cfg.size); });
     return list;
   }
 
-  function shipName(size) {
-    return t('ship' + size);
-  }
-
-  function getShipShape(ship, r, c) {
-    if (ship.size === 1) return 'single';
-    const horiz = ship.cells[0].r === ship.cells[1].r;
-    const idx = ship.cells.findIndex(sc => sc.r === r && sc.c === c);
-    if (horiz) {
-      if (idx === 0) return 'h-bow';
-      if (idx === ship.size - 1) return 'h-stern';
-      return 'h-mid';
-    } else {
-      if (idx === 0) return 'v-bow';
-      if (idx === ship.size - 1) return 'v-stern';
-      return 'v-mid';
-    }
-  }
-
-  function getShapeForSize(size, horiz) {
-    const shapes = [];
-    if (size === 1) return ['single'];
-    for (let i = 0; i < size; i++) {
-      let s;
-      if (horiz) s = i === 0 ? 'h-bow' : i === size - 1 ? 'h-stern' : 'h-mid';
-      else s = i === 0 ? 'v-bow' : i === size - 1 ? 'v-stern' : 'v-mid';
-      shapes.push(s);
-    }
-    return shapes;
-  }
+  function shipName(size) { return t('ship' + size); }
 
   function shoot(board, r, c) {
     const cell = board.cells[r][c];
     if (cell.shot) return null;
     cell.shot = true;
-
     if (cell.ship) {
       cell.ship.hits++;
       if (cell.ship.hits >= cell.ship.size) {
         cell.ship.sunk = true;
-        for (const sc of cell.ship.cells) {
-          for (let dr = -1; dr <= 1; dr++) {
-            for (let dc = -1; dc <= 1; dc++) {
-              const nr = sc.r + dr, nc = sc.c + dc;
-              if (nr < 0 || nc < 0 || nr >= SIZE || nc >= SIZE) continue;
-              const ncell = board.cells[nr][nc];
-              if (!ncell.shot) { ncell.shot = true; ncell.auto = true; }
-            }
-          }
+        for (const sc of cell.ship.cells) for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+          const nr = sc.r + dr, nc = sc.c + dc;
+          if (nr < 0 || nc < 0 || nr >= SIZE || nc >= SIZE) continue;
+          const ncell = board.cells[nr][nc];
+          if (!ncell.shot) { ncell.shot = true; ncell.auto = true; }
         }
         return 'sunk';
       }
@@ -1207,75 +1218,55 @@
   }
 
   function buildGrid(gridEl, arr, onClick) {
-    gridEl.innerHTML = '';
-    arr.length = 0;
-    for (let r = 0; r < SIZE; r++) {
-      for (let c = 0; c < SIZE; c++) {
-        const d = document.createElement('div');
-        d.className = 'cell';
-        d.dataset.r = r;
-        d.dataset.c = c;
-
-        d.addEventListener('click', (e) => { e.preventDefault(); onClick(r, c); });
-
-        d.addEventListener('contextmenu', (e) => {
-          e.preventDefault();
-          if (phase === 'placement') rotate();
-        });
-
-        gridEl.appendChild(d);
-        arr.push(d);
-      }
+    gridEl.innerHTML = ''; arr.length = 0;
+    for (let r = 0; r < SIZE; r++) for (let c = 0; c < SIZE; c++) {
+      const d = document.createElement('div');
+      d.className = 'cell'; d.dataset.r = r; d.dataset.c = c;
+      d.addEventListener('click', (e) => { e.preventDefault(); onClick(r, c); });
+      d.addEventListener('contextmenu', (e) => { e.preventDefault(); if (phase === 'placement') rotate(); });
+      gridEl.appendChild(d); arr.push(d);
     }
   }
 
   function paintBoard(arr, board, showShips) {
-    for (let r = 0; r < SIZE; r++) {
-      for (let c = 0; c < SIZE; c++) {
-        const el = arr[r * SIZE + c];
-        const cell = board.cells[r][c];
-        let cls = 'cell';
-
-        if (cell.shot) {
-          cls += ' shot';
-          if (cell.ship) {
-            cls += cell.ship.sunk ? ' sunk' : ' hit';
-            cls += ' ship-shape-' + getShipShape(cell.ship, r, c);
-          } else {
-            cls += cell.auto ? ' auto' : ' miss';
-          }
-        } else if (showShips && cell.ship) {
-          cls += ' ship';
-          cls += ' ship-size-' + cell.ship.size;
-          cls += ' ship-shape-' + getShipShape(cell.ship, r, c);
-        } else if (cell.scouted) {
-          cls += ' scouted';
-        }
-
-        el.className = cls;
-      }
+    for (let r = 0; r < SIZE; r++) for (let c = 0; c < SIZE; c++) {
+      const el = arr[r * SIZE + c], cell = board.cells[r][c];
+      let cls = 'cell';
+      if (cell.shot) {
+        cls += ' shot';
+        if (cell.ship) cls += cell.ship.sunk ? ' sunk' : ' hit';
+        else cls += cell.auto ? ' auto' : ' miss';
+      } else if (showShips && cell.ship) {
+        cls += ' ship ship-size-' + cell.ship.size;
+      } else if (cell.scouted) cls += ' scouted';
+      el.className = cls;
     }
   }
 
   function getLeftBoard()  { return mode === 'bot' ? boards[0] : boards[activePlayer]; }
   function getRightBoard() { return mode === 'bot' ? boards[1] : boards[1 - activePlayer]; }
 
+  // ⬇️ Ключевая функция: включает/выключает режим "большого поля" во время боя
+  function updateBattleModeClass() {
+    if (phase === 'battle') {
+      document.body.classList.add('battle-mode');
+    } else {
+      document.body.classList.remove('battle-mode');
+    }
+  }
+
   function renderAll() {
-    if (phase === 'menu' || !boards.length) return;
-
-    const lb = getLeftBoard();
-    const rb = getRightBoard();
-
-    paintBoard(playerCells, lb, true);
-    paintBoard(enemyCells, rb, phase === 'over');
+    if (phase === 'menu' || !boards.length) {
+      updateBattleModeClass();
+      return;
+    }
+    paintBoard(playerCells, getLeftBoard(), true);
+    paintBoard(enemyCells, getRightBoard(), phase === 'over');
 
     if (phase === 'placement' && previewCells.length) {
       for (const p of previewCells) {
         const el = playerCells[p.r * SIZE + p.c];
-        if (!el.classList.contains('ship')) {
-          el.classList.add(previewValid ? 'preview-ok' : 'preview-bad');
-          if (p.shape) el.classList.add('ship-shape-' + p.shape);
-        }
+        if (!el.classList.contains('ship')) el.classList.add(previewValid ? 'preview-ok' : 'preview-bad');
       }
     }
 
@@ -1287,13 +1278,12 @@
       rightTitle.textContent = t('enemyField', { n: (1 - activePlayer) + 1 });
     }
 
-    const canShoot = phase === 'battle' && !busy && (mode === 'duo' || playerTurn);
-    enemyGridEl.classList.toggle('enemy-active', canShoot);
-
-    const canPlace = phase === 'placement';
-    playerGridEl.classList.toggle('place-active', canPlace);
-
+    enemyGridEl.classList.toggle('enemy-active', phase === 'battle' && !busy && (mode === 'duo' || playerTurn));
+    playerGridEl.classList.toggle('place-active', phase === 'placement');
     updateScoutButton();
+
+    // Применяем battle-mode
+    updateBattleModeClass();
   }
 
   function renderFleetList() {
@@ -1304,9 +1294,7 @@
       if (i === currentShipIdx) chip.classList.add('active');
       if (i < currentShipIdx) chip.classList.add('done');
       for (let k = 0; k < size; k++) {
-        const b = document.createElement('span');
-        b.className = 'blk';
-        chip.appendChild(b);
+        const b = document.createElement('span'); b.className = 'blk'; chip.appendChild(b);
       }
       fleetListEl.appendChild(chip);
     });
@@ -1317,7 +1305,6 @@
     if (size === undefined) return;
     shipSizeLabel.textContent = shipName(size);
     shipsLeftLabel.textContent = shipsToPlace.length - currentShipIdx;
-
     const badge = document.getElementById('orientationText');
     if (horizontal) {
       orientationBadge.classList.remove('vertical');
@@ -1331,18 +1318,13 @@
   function updateStatus() {
     if (phase === 'menu') { statusEl.textContent = ''; statusEl.className = 'status'; return; }
     if (phase === 'over') return;
-
     if (phase === 'placement') {
       const left = shipsToPlace.length - currentShipIdx;
-      let who = '';
-      if (mode === 'duo') who = t('playerPrefix', { n: activePlayer + 1 });
-      statusEl.textContent = left > 0
-        ? who + t('statusLeft', { n: left })
-        : who + t('statusReady');
+      let who = mode === 'duo' ? t('playerPrefix', { n: activePlayer + 1 }) : '';
+      statusEl.textContent = left > 0 ? who + t('statusLeft', { n: left }) : who + t('statusReady');
       statusEl.className = 'status';
       return;
     }
-
     if (mode === 'bot') {
       statusEl.textContent = playerTurn ? t('statusYourTurn') : t('statusEnemyTurn');
       statusEl.className = 'status ' + (playerTurn ? 'you' : 'enemy');
@@ -1353,27 +1335,16 @@
   }
 
   function updateScoutButton() {
-    if (phase !== 'battle') {
-      scoutBtn.style.display = 'none';
-      stopScoutTimer();
-      return;
-    }
+    if (phase !== 'battle') { scoutBtn.style.display = 'none'; stopScoutTimer(); return; }
     scoutBtn.style.display = '';
-
     const idx = mode === 'bot' ? 0 : activePlayer;
-    const now = Date.now();
-    const remain = scoutCooldownEnd[idx] - now;
-
+    const remain = scoutCooldownEnd[idx] - Date.now();
     if (remain > 0) {
-      scoutBtn.disabled = true;
-      scoutBtn.classList.add('cooldown');
-      scoutBtn.classList.remove('used');
-      const sec = Math.ceil(remain / 1000);
-      scoutBtn.textContent = t('scoutCooling', { n: sec });
+      scoutBtn.disabled = true; scoutBtn.classList.add('cooldown');
+      scoutBtn.textContent = t('scoutCooling', { n: Math.ceil(remain / 1000) });
       startScoutTimer();
     } else {
-      scoutBtn.disabled = false;
-      scoutBtn.classList.remove('cooldown', 'used');
+      scoutBtn.disabled = false; scoutBtn.classList.remove('cooldown');
       scoutBtn.textContent = t('scout');
       stopScoutTimer();
     }
@@ -1381,32 +1352,19 @@
 
   function startScoutTimer() {
     if (scoutTimerId) return;
-    scoutTimerId = setInterval(() => {
-      if (phase !== 'battle') { stopScoutTimer(); return; }
-      updateScoutButton();
-    }, 1000);
+    scoutTimerId = setInterval(() => { if (phase !== 'battle') { stopScoutTimer(); return; } updateScoutButton(); }, 1000);
   }
-
-  function stopScoutTimer() {
-    if (scoutTimerId) {
-      clearInterval(scoutTimerId);
-      scoutTimerId = null;
-    }
-  }
+  function stopScoutTimer() { if (scoutTimerId) { clearInterval(scoutTimerId); scoutTimerId = null; } }
 
   function tryScout() {
     if (phase !== 'battle') return;
     const idx = mode === 'bot' ? 0 : activePlayer;
     if (Date.now() < scoutCooldownEnd[idx]) return;
-
     const targetBoard = mode === 'bot' ? boards[1] : boards[1 - activePlayer];
-
     let hasCandidates = false;
-    for (let r = 0; r < SIZE && !hasCandidates; r++) {
-      for (let c = 0; c < SIZE; c++) {
-        const cell = targetBoard.cells[r][c];
-        if (cell.ship && !cell.shot && !cell.scouted) { hasCandidates = true; break; }
-      }
+    for (let r = 0; r < SIZE && !hasCandidates; r++) for (let c = 0; c < SIZE; c++) {
+      const cell = targetBoard.cells[r][c];
+      if (cell.ship && !cell.shot && !cell.scouted) { hasCandidates = true; break; }
     }
     if (!hasCandidates) {
       statusEl.textContent = t('scoutNoTarget');
@@ -1414,11 +1372,8 @@
       setTimeout(() => updateStatus(), 1500);
       return;
     }
-
-    scoutBtn.disabled = true;
-    scoutBtn.classList.add('cooldown');
+    scoutBtn.disabled = true; scoutBtn.classList.add('cooldown');
     scoutBtn.textContent = t('scoutLoading');
-
     showRewardedAd(() => {
       doScout(targetBoard);
       scoutCooldownEnd[idx] = Date.now() + SCOUT_COOLDOWN_MS;
@@ -1432,11 +1387,9 @@
 
   function doScout(board) {
     const candidates = [];
-    for (let r = 0; r < SIZE; r++) {
-      for (let c = 0; c < SIZE; c++) {
-        const cell = board.cells[r][c];
-        if (cell.ship && !cell.shot && !cell.scouted) candidates.push({ r, c });
-      }
+    for (let r = 0; r < SIZE; r++) for (let c = 0; c < SIZE; c++) {
+      const cell = board.cells[r][c];
+      if (cell.ship && !cell.shot && !cell.scouted) candidates.push({ r, c });
     }
     if (!candidates.length) return;
     const pick = candidates[Math.floor(Math.random() * candidates.length)];
@@ -1451,102 +1404,63 @@
   }
 
   function setPreview(r, c) {
-    previewCells = [];
-    previewValid = false;
+    previewCells = []; previewValid = false;
     if (phase !== 'placement') return;
     const size = shipsToPlace[currentShipIdx];
     if (size === undefined) return;
-
-    const shapes = getShapeForSize(size, horizontal);
     const cells = [];
     for (let i = 0; i < size; i++) {
-      const rr = r + (horizontal ? 0 : i);
-      const cc = c + (horizontal ? i : 0);
+      const rr = r + (horizontal ? 0 : i), cc = c + (horizontal ? i : 0);
       if (rr >= SIZE || cc >= SIZE) { previewCells = []; renderAll(); return; }
-      cells.push({ r: rr, c: cc, shape: shapes[i] });
+      cells.push({ r: rr, c: cc });
     }
     previewCells = cells;
-    const board = getLeftBoard();
-    previewValid = canPlace(board, r, c, size, horizontal);
+    previewValid = canPlace(getLeftBoard(), r, c, size, horizontal);
     renderAll();
   }
 
-  function clearPreview() {
-    previewCells = [];
-    previewValid = false;
-    renderAll();
-  }
+  function clearPreview() { previewCells = []; previewValid = false; renderAll(); }
 
   function handlePlayerClick(r, c) {
     if (phase !== 'placement') return;
     const board = getLeftBoard();
     const size = shipsToPlace[currentShipIdx];
     if (size === undefined) return;
-
     if (!canPlace(board, r, c, size, horizontal)) {
-      previewCells = [];
-      previewValid = false;
-      const shapes = getShapeForSize(size, horizontal);
+      previewCells = []; previewValid = false;
       for (let i = 0; i < size; i++) {
-        const rr = r + (horizontal ? 0 : i);
-        const cc = c + (horizontal ? i : 0);
-        if (rr < SIZE && cc < SIZE) previewCells.push({ r: rr, c: cc, shape: shapes[i] });
+        const rr = r + (horizontal ? 0 : i), cc = c + (horizontal ? i : 0);
+        if (rr < SIZE && cc < SIZE) previewCells.push({ r: rr, c: cc });
       }
       renderAll();
       setTimeout(clearPreview, 350);
       if (navigator.vibrate) navigator.vibrate(40);
       return;
     }
-
     placeShip(board, r, c, size, horizontal);
-    currentShipIdx++;
-    previewCells = [];
-
+    currentShipIdx++; previewCells = [];
     if (currentShipIdx >= shipsToPlace.length) {
       if (mode === 'bot') {
-        phase = 'battle';
-        playerTurn = true;
+        phase = 'battle'; playerTurn = true;
         placementPanel.classList.add('hidden');
-        renderAll();
-        updateStatus();
-        gameplayStart();
+        renderAll(); updateStatus(); gameplayStart();
       } else {
         if (activePlayer === 0) {
-          renderAll();
-          updateStatus();
-          showPass(
-            t('passTitle', { n: 2 }),
-            t('passPlacement', { n: 1, n2: 2 }),
-            () => {
-              activePlayer = 1;
-              currentShipIdx = 0;
-              shipsToPlace = buildShipList();
-              previewCells = [];
-              previewValid = false;
-              renderFleetList();
-              renderPlacementInfo();
-              renderAll();
-              updateStatus();
-            }
-          );
+          renderAll(); updateStatus();
+          showPass(t('passTitle', { n: 2 }), t('passPlacement', { n: 1, n2: 2 }), () => {
+            activePlayer = 1; currentShipIdx = 0;
+            shipsToPlace = buildShipList(); previewCells = [];
+            renderFleetList(); renderPlacementInfo(); renderAll(); updateStatus();
+          });
         } else {
-          phase = 'battle';
-          activePlayer = 0;
+          phase = 'battle'; activePlayer = 0;
           placementPanel.classList.add('hidden');
-          renderAll();
-          updateStatus();
-          gameplayStart();
-          showPass(
-            t('passTitle', { n: 1 }),
-            t('passReady', { n: 1 }),
-            () => { renderAll(); updateStatus(); }
-          );
+          renderAll(); updateStatus(); gameplayStart();
+          showPass(t('passTitle', { n: 1 }), t('passReady', { n: 1 }), () => { renderAll(); updateStatus(); });
         }
       }
     } else {
-      renderFleetList();
-      renderPlacementInfo();
-      renderAll();
+      renderFleetList(); renderPlacementInfo(); renderAll();
     }
     updateStatus();
   }
@@ -1555,56 +1469,36 @@
     if (phase !== 'placement') return;
     horizontal = !horizontal;
     renderPlacementInfo();
-    if (previewCells.length) {
-      const last = previewCells[0];
-      setPreview(last.r, last.c);
-    }
+    if (previewCells.length) { const last = previewCells[0]; setPreview(last.r, last.c); }
     if (navigator.vibrate) navigator.vibrate(15);
   }
 
   function handleEnemyClick(r, c) {
     if (phase !== 'battle' || busy) return;
     if (mode === 'bot' && !playerTurn) return;
-
     const targetBoard = mode === 'bot' ? boards[1] : boards[1 - activePlayer];
     const cell = targetBoard.cells[r][c];
     if (cell.shot) return;
-
     busy = true;
     const res = shoot(targetBoard, r, c);
     renderAll();
-
     if (targetBoard.ships.every(s => s.sunk)) { busy = false; endGame(activePlayer); return; }
-
     if (res === 'miss') {
       if (mode === 'bot') {
-        playerTurn = false;
-        busy = false;
-        renderAll();
-        updateStatus();
+        playerTurn = false; busy = false; renderAll(); updateStatus();
         setTimeout(aiTurn, 620);
       } else {
         const nextPlayer = 1 - activePlayer;
-        busy = false;
-        renderAll();
-        updateStatus();
-        showPass(
-          t('passTitle', { n: nextPlayer + 1 }),
-          t('passMiss', { n: activePlayer + 1 }),
-          () => { activePlayer = nextPlayer; renderAll(); updateStatus(); }
-        );
+        busy = false; renderAll(); updateStatus();
+        showPass(t('passTitle', { n: nextPlayer + 1 }), t('passMiss', { n: activePlayer + 1 }),
+          () => { activePlayer = nextPlayer; renderAll(); updateStatus(); });
       }
-    } else {
-      busy = false;
-      renderAll();
-      updateStatus();
-    }
+    } else { busy = false; renderAll(); updateStatus(); }
   }
 
   function aiChooseTarget() {
     const board = boards[0];
     const free = (r, c) => r >= 0 && c >= 0 && r < SIZE && c < SIZE && !board.cells[r][c].shot;
-
     if (aiHitCells.length) {
       const byRow = {}, byCol = {};
       for (const h of aiHitCells) {
@@ -1628,61 +1522,38 @@
         }
       }
       const neighbors = [];
-      for (const h of aiHitCells) {
-        for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
-          const nr = h.r + dr, nc = h.c + dc;
-          if (free(nr, nc)) neighbors.push({ r: nr, c: nc });
-        }
+      for (const h of aiHitCells) for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+        const nr = h.r + dr, nc = h.c + dc;
+        if (free(nr, nc)) neighbors.push({ r: nr, c: nc });
       }
       if (neighbors.length) return neighbors[Math.floor(Math.random() * neighbors.length)];
     }
-
     const avail = [];
-    for (let r = 0; r < SIZE; r++)
-      for (let c = 0; c < SIZE; c++)
-        if (!board.cells[r][c].shot) avail.push({ r, c });
-
-    const chebyshev = avail.filter(p => (p.r + p.c) % 2 === 0);
-    const pool = chebyshev.length ? chebyshev : avail;
-    return pool[Math.floor(Math.random() * pool.length)];
+    for (let r = 0; r < SIZE; r++) for (let c = 0; c < SIZE; c++) if (!board.cells[r][c].shot) avail.push({ r, c });
+    const ch = avail.filter(p => (p.r + p.c) % 2 === 0);
+    return (ch.length ? ch : avail)[Math.floor(Math.random() * (ch.length || avail.length))];
   }
 
   function aiTurn() {
     if (phase !== 'battle' || mode !== 'bot') return;
     busy = true;
-
     const target = aiChooseTarget();
     if (!target) { busy = false; return; }
-
     const res = shoot(boards[0], target.r, target.c);
-
     if (res === 'hit') aiHitCells.push(target);
     else if (res === 'sunk') {
       const ship = boards[0].cells[target.r][target.c].ship;
       aiHitCells = aiHitCells.filter(h => !ship.cells.some(sc => sc.r === h.r && sc.c === h.c));
     }
-
     renderAll();
-
     if (boards[0].ships.every(s => s.sunk)) { busy = false; endGame(1); return; }
-
-    if (res === 'miss') {
-      playerTurn = true;
-      busy = false;
-      renderAll();
-      updateStatus();
-    } else {
-      updateStatus();
-      setTimeout(aiTurn, 620);
-    }
+    if (res === 'miss') { playerTurn = true; busy = false; renderAll(); updateStatus(); }
+    else { updateStatus(); setTimeout(aiTurn, 620); }
   }
 
   function endGame(winnerIdx) {
-    phase = 'over';
-    busy = false;
-    gameplayStop();
-    stopScoutTimer();
-
+    phase = 'over'; busy = false;
+    gameplayStop(); stopScoutTimer();
     if (mode === 'bot') {
       const playerWon = winnerIdx === 0;
       statusEl.textContent = playerWon ? t('win') : t('lose');
@@ -1691,13 +1562,11 @@
       statusEl.textContent = t('playerWin', { n: winnerIdx + 1 });
       statusEl.className = 'status win';
     }
-
-    const rb = getRightBoard();
-    paintBoard(enemyCells, rb, true);
+    paintBoard(enemyCells, getRightBoard(), true);
     enemyGridEl.classList.remove('enemy-active');
     playerGridEl.classList.remove('place-active');
     scoutBtn.style.display = 'none';
-
+    updateBattleModeClass();
     setTimeout(() => { showFullscreenAd(); }, 1200);
   }
 
@@ -1705,18 +1574,10 @@
     mode = m;
     boards = [createBoard(), createBoard()];
     if (m === 'bot') randomFill(boards[1]);
-
-    activePlayer = 0;
-    playerTurn = true;
-    busy = false;
-    shipsToPlace = buildShipList();
-    currentShipIdx = 0;
-    horizontal = true;
-    previewCells = [];
-    previewValid = false;
-    aiHitCells = [];
-    scoutCooldownEnd = [0, 0];
-    stopScoutTimer();
+    activePlayer = 0; playerTurn = true; busy = false;
+    shipsToPlace = buildShipList(); currentShipIdx = 0;
+    horizontal = true; previewCells = []; previewValid = false;
+    aiHitCells = []; scoutCooldownEnd = [0, 0]; stopScoutTimer();
     phase = 'placement';
 
     buildGrid(playerGridEl, playerCells, handlePlayerClick);
@@ -1725,31 +1586,21 @@
     menuEl.classList.add('hidden');
     passEl.classList.add('hidden');
     placementPanel.classList.remove('hidden');
-
-    renderFleetList();
-    renderPlacementInfo();
-    renderAll();
-    updateStatus();
+    renderFleetList(); renderPlacementInfo(); renderAll(); updateStatus();
   }
 
   function backToMenu() {
-    gameplayStop();
-    stopScoutTimer();
-    phase = 'menu';
-    boards = [];
-    playerCells = [];
-    enemyCells = [];
-    playerGridEl.innerHTML = '';
-    enemyGridEl.innerHTML = '';
-    fleetListEl.innerHTML = '';
+    gameplayStop(); stopScoutTimer();
+    phase = 'menu'; boards = []; playerCells = []; enemyCells = [];
+    playerGridEl.innerHTML = ''; enemyGridEl.innerHTML = ''; fleetListEl.innerHTML = '';
     placementPanel.classList.add('hidden');
     passEl.classList.add('hidden');
     menuEl.classList.remove('hidden');
-    statusEl.textContent = '';
-    statusEl.className = 'status';
+    statusEl.textContent = ''; statusEl.className = 'status';
     leftTitle.textContent = t('yourFleet');
     rightTitle.textContent = t('enemyFleet');
     scoutBtn.style.display = 'none';
+    updateBattleModeClass();
   }
 
   buildGrid(playerGridEl, playerCells, handlePlayerClick);
@@ -1761,7 +1612,6 @@
     if (!el) return;
     setPreview(+el.dataset.r, +el.dataset.c);
   });
-
   playerGridEl.addEventListener('mouseleave', clearPreview);
 
   rotateBtn.addEventListener('click', rotate);
@@ -1770,49 +1620,25 @@
 
   randomBtn.addEventListener('click', () => {
     if (phase !== 'placement') return;
-    const board = getLeftBoard();
-    randomFill(board);
-    currentShipIdx = shipsToPlace.length;
-    previewCells = [];
-
+    randomFill(getLeftBoard());
+    currentShipIdx = shipsToPlace.length; previewCells = [];
     if (mode === 'bot') {
-      phase = 'battle';
-      playerTurn = true;
+      phase = 'battle'; playerTurn = true;
       placementPanel.classList.add('hidden');
-      renderAll();
-      updateStatus();
-      gameplayStart();
+      renderAll(); updateStatus(); gameplayStart();
     } else {
       if (activePlayer === 0) {
-        renderAll();
-        updateStatus();
-        showPass(
-          t('passTitle', { n: 2 }),
-          t('passPlacement', { n: 1, n2: 2 }),
-          () => {
-            activePlayer = 1;
-            currentShipIdx = 0;
-            shipsToPlace = buildShipList();
-            previewCells = [];
-            previewValid = false;
-            renderFleetList();
-            renderPlacementInfo();
-            renderAll();
-            updateStatus();
-          }
-        );
+        renderAll(); updateStatus();
+        showPass(t('passTitle', { n: 2 }), t('passPlacement', { n: 1, n2: 2 }), () => {
+          activePlayer = 1; currentShipIdx = 0;
+          shipsToPlace = buildShipList(); previewCells = [];
+          renderFleetList(); renderPlacementInfo(); renderAll(); updateStatus();
+        });
       } else {
-        phase = 'battle';
-        activePlayer = 0;
+        phase = 'battle'; activePlayer = 0;
         placementPanel.classList.add('hidden');
-        renderAll();
-        updateStatus();
-        gameplayStart();
-        showPass(
-          t('passTitle', { n: 1 }),
-          t('passReady', { n: 1 }),
-          () => { renderAll(); updateStatus(); }
-        );
+        renderAll(); updateStatus(); gameplayStart();
+        showPass(t('passTitle', { n: 1 }), t('passReady', { n: 1 }), () => { renderAll(); updateStatus(); });
       }
     }
   });
@@ -1821,13 +1647,8 @@
     if (phase !== 'placement') return;
     const board = getLeftBoard();
     board.cells.forEach(row => row.forEach(cell => { cell.ship = null; }));
-    board.ships = [];
-    currentShipIdx = 0;
-    previewCells = [];
-    renderAll();
-    renderFleetList();
-    renderPlacementInfo();
-    updateStatus();
+    board.ships = []; currentShipIdx = 0; previewCells = [];
+    renderAll(); renderFleetList(); renderPlacementInfo(); updateStatus();
   });
 
   window.addEventListener('keydown', e => {
@@ -1847,11 +1668,8 @@
     else if (phase === 'battle') gameplayStart();
   });
 
-  // Стартуем — сначала применяем язык браузера
   applyTranslations();
   backToMenu();
-
-  // Запуск SDK (асинхронно перезапишет язык, если Яндекс ответит)
   initYandexSDK();
 })();
 </script>
