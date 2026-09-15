@@ -8,7 +8,29 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#f6f0dd">
 <title>Морской бой: На пределе</title>
-<script src="/sdk.js"></script>
+
+<!-- VK Bridge — грузим всегда, вне VK он безопасен и просто не отвечает -->
+<script src="https://unpkg.com/@vkontakte/vk-bridge@2/dist/browser.min.js"></script>
+<!-- Yandex SDK — только вне VK-контекста -->
+<script>
+(function(){
+  var sp = new URLSearchParams(location.search);
+  var vkCtx = sp.has('vk_app_id') || sp.has('vk_user_id') || sp.has('vk_platform');
+  if (!vkCtx) {
+    try {
+      var refHost = document.referrer ? new URL(document.referrer).hostname : '';
+      if (/vk\.(com|ru)$/.test(refHost)) vkCtx = true;
+    } catch(e){}
+  }
+  if (vkCtx) { console.log('[BOOT] VK context — Yandex SDK skipped'); return; }
+  var s = document.createElement('script');
+  s.src = '/sdk.js';
+  s.async = false;
+  s.onerror = function(){ console.log('[BOOT] /sdk.js not available (non-Yandex)'); };
+  document.head.appendChild(s);
+})();
+</script>
+
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
@@ -133,9 +155,6 @@
     border-bottom: 1px dashed var(--ink-faded);
   }
 
-  /* ============================================================
-     СЕТКА — размер клетки плавно увеличивается в battle-mode
-     ============================================================ */
   .grid {
     display: grid;
     grid-template-columns: repeat(10, var(--cell));
@@ -550,7 +569,6 @@
   }
   #newGameBtn:hover { background: linear-gradient(180deg, #f0e8dc 0%, #d8d0bc 100%); }
 
-  /* Overlays */
   .overlay {
     position: fixed;
     inset: 0;
@@ -669,9 +687,6 @@
     filter: drop-shadow(2px 2px 0 rgba(60, 100, 160, 0.2));
   }
 
-  /* ============================================================
-     БАЗОВЫЙ ШИРОКОФОРМАТНЫЙ РЕЖИМ (расстановка)
-     ============================================================ */
   @media (min-aspect-ratio: 16/10) and (min-height: 450px) {
     :root { --cell: min(4.8vh, 3vw, 50px); }
 
@@ -755,9 +770,6 @@
     :root { --cell: min(4.9vh, 2.8vw, 54px); }
   }
 
-  /* ============================================================
-     BATTLE-MODE — БОЛЬШОЕ ПОЛЕ, КОГДА ПАНЕЛЬ РАССТАНОВКИ СКРЫТА
-     ============================================================ */
   @media (min-aspect-ratio: 16/10) and (min-height: 450px) {
     body.battle-mode { --cell: min(6.8vh, 4.2vw, 72px); }
 
@@ -769,7 +781,6 @@
     body.battle-mode { --cell: min(7vh, 3.6vw, 78px); }
   }
 
-  /* На средних экранах (когда места не очень много) — умеренно увеличиваем */
   @media (min-aspect-ratio: 16/10) and (max-height: 700px) {
     body.battle-mode { --cell: min(6.4vh, 4vw, 64px); }
   }
@@ -778,9 +789,6 @@
     body.battle-mode { --cell: min(6vh, 4vw, 56px); }
   }
 
-  /* ============================================================
-     МОБИЛЬНАЯ ПОРТРЕТНАЯ
-     ============================================================ */
   @media (max-aspect-ratio: 4/3) {
     :root { --cell: min(8vw, 8vh, 40px); }
     .game { gap: 8px; }
@@ -801,7 +809,6 @@
     #scoutBtn { min-width: 200px; font-size: 12px; }
     #newGameBtn { min-width: 110px; }
 
-    /* В бою на мобильном — одно поле, значит можно заметно крупнее */
     body.battle-mode { --cell: min(11vw, 9vh, 56px); }
   }
 
@@ -824,7 +831,6 @@
     body.battle-mode { --cell: min(11.5vw, 9.5vh, 52px); }
   }
 
-  /* Ландшафт телефона */
   @media (max-height: 520px) and (orientation: landscape) {
     :root { --cell: min(6.2vh, 6vw, 34px); }
     body { padding: 4px 8px; }
@@ -920,7 +926,6 @@
   </div>
 </div>
 
-<!-- Главное меню -->
 <div class="overlay" id="menu">
   <div class="overlay-box">
     <div class="icon">⚓</div>
@@ -936,7 +941,6 @@
   </div>
 </div>
 
-<!-- Экран передачи хода -->
 <div class="overlay hidden" id="pass">
   <div class="overlay-box">
     <div class="icon">🎮</div>
@@ -1052,55 +1056,173 @@
     return 'en';
   }
 
-  let ysdk = null;
-  let lastAdTime = 0;
+  /* ======================= ПЛАТФОРМА (VK + YANDEX + OFFLINE) ======================= */
   const MIN_AD_INTERVAL = 60000;
   const SCOUT_COOLDOWN_MS = 60000;
+  let lastAdTime = 0;
 
-  function initYandexSDK() {
-    LANG = detectLocalLang();
-    if (typeof YaGames === 'undefined') { applyTranslations(); return; }
-    YaGames.init().then(sdk => {
-      ysdk = sdk;
+  const Platform = {
+    name: 'offline',
+    lang: null,
+    ready: false,
+    _vk: null,
+    _ysdk: null,
+    _lastInt: 0,
+
+    isVKContext() {
       try {
-        const yandexLang = ysdk.environment.i18n.lang;
-        if (yandexLang === 'ru' || yandexLang === 'en' || yandexLang === 'tr') LANG = yandexLang;
-        else if (yandexLang) LANG = 'en';
-      } catch (e) {}
-      applyTranslations();
-      updateStatus();
-      renderAll();
-      ysdk.features.LoadingAPI?.ready();
-    }).catch(err => { console.error('[YSDK] Init failed:', err); applyTranslations(); });
-  }
+        const sp = new URLSearchParams(location.search);
+        if (sp.has('vk_app_id') || sp.has('vk_user_id') || sp.has('vk_platform')) return true;
+        if (window.parent !== window && document.referrer) {
+          const h = new URL(document.referrer).hostname;
+          if (/(^|\.)vk\.(com|ru)$/.test(h)) return true;
+        }
+      } catch(e){}
+      return false;
+    },
 
-  function gameplayStart() { try { ysdk?.features?.GameplayAPI?.start(); } catch (e) {} }
-  function gameplayStop() { try { ysdk?.features?.GameplayAPI?.stop(); } catch (e) {} }
+    async init() {
+      // 1) VK
+      if (typeof vkBridge !== 'undefined' && this.isVKContext()) {
+        try {
+          await Promise.race([
+            vkBridge.send('VKWebAppInit'),
+            new Promise((_, rej) => setTimeout(() => rej(new Error('vk timeout')), 2500))
+          ]);
+          this._vk = vkBridge;
+          this.name = 'vk';
+          this.ready = true;
 
-  function showFullscreenAd(callback) {
-    const now = Date.now();
-    if (now - lastAdTime < MIN_AD_INTERVAL) { callback?.(); return; }
-    if (!ysdk) { callback?.(); return; }
-    ysdk.adv.showFullscreenAdv({
-      callbacks: {
-        onClose: () => { lastAdTime = Date.now(); callback?.(); },
-        onError: (err) => { console.warn('[YSDK] Fullscreen error:', err); callback?.(); }
+          try {
+            const lp = await vkBridge.send('VKWebAppGetLaunchParams');
+            const raw = (lp && lp.vk_language || '').toLowerCase();
+            if (TRANSLATIONS[raw]) this.lang = raw;
+            else if (['uk','be','kk','uz','ky','az','hy','ka'].includes(raw)) this.lang = 'ru';
+            else if (raw) this.lang = 'en';
+          } catch(e){}
+
+          try {
+            const u = await vkBridge.send('VKWebAppGetUserInfo');
+            if (u && u.id) console.log('[VK] Игрок:', u.first_name, u.last_name, '| id =', u.id);
+          } catch(e){}
+
+          console.log('[Platform] VK Bridge инициализирован');
+          return;
+        } catch(e) {
+          console.log('[Platform] VK Bridge недоступен:', e.message || e);
+        }
       }
-    });
-  }
 
-  function showRewardedAd(onReward) {
-    if (!ysdk) { onReward?.(); return; }
-    ysdk.adv.showRewardedVideo({
-      callbacks: {
-        onOpen: () => { gameplayStop(); },
-        onRewarded: () => { onReward?.(); },
-        onClose: () => { if (phase === 'battle') gameplayStart(); },
-        onError: () => { if (phase === 'battle') gameplayStart(); }
+      // 2) Yandex
+      if (typeof YaGames !== 'undefined') {
+        try {
+          const ysdk = await Promise.race([
+            YaGames.init(),
+            new Promise((_, rej) => setTimeout(() => rej(new Error('ysdk timeout')), 2500))
+          ]);
+          this._ysdk = ysdk;
+          this.name = 'yandex';
+          this.ready = true;
+
+          try {
+            const sdkLang = ysdk.environment && ysdk.environment.i18n && ysdk.environment.i18n.lang;
+            if (sdkLang === 'ru' || sdkLang === 'en' || sdkLang === 'tr') this.lang = sdkLang;
+            else if (sdkLang) this.lang = 'en';
+          } catch(e){}
+
+          try { ysdk.features?.LoadingAPI?.ready(); } catch(e){}
+
+          console.log('[Platform] Yandex SDK инициализирован');
+          return;
+        } catch(e) {
+          console.log('[Platform] Yandex SDK недоступен:', e.message || e);
+        }
       }
-    });
-  }
 
+      console.log('[Platform] Работаем офлайн');
+    },
+
+    gameplayStart() {
+      if (this.name === 'yandex') { try { this._ysdk.features.GameplayAPI.start(); } catch(e){} }
+    },
+    gameplayStop() {
+      if (this.name === 'yandex') { try { this._ysdk.features.GameplayAPI.stop(); } catch(e){} }
+    },
+
+    showInterstitial(callback) {
+      const done = () => { try { callback && callback(); } catch(e){} };
+
+      if (this.name === 'vk') {
+        const now = Date.now();
+        if (now - this._lastInt < MIN_AD_INTERVAL) { done(); return; }
+        this._vk.send('VKWebAppShowNativeAds', { ad_format: 'interstitial' })
+          .then(() => { this._lastInt = Date.now(); done(); })
+          .catch(e => { console.warn('[VK] interstitial error:', e); done(); });
+      } else if (this.name === 'yandex') {
+        const now = Date.now();
+        if (now - lastAdTime < MIN_AD_INTERVAL) { done(); return; }
+        try {
+          this._ysdk.adv.showFullscreenAdv({
+            callbacks: {
+              onClose: () => { lastAdTime = Date.now(); done(); },
+              onError: (e) => { console.warn('[YSDK] fullscreen error:', e); done(); }
+            }
+          });
+        } catch(e) { console.warn('[YSDK] fullscreen exception:', e); done(); }
+      } else {
+        done();
+      }
+    },
+
+    showRewarded(onReward) {
+      if (this.name === 'vk') {
+        let settled = false;
+        const finish = (ok, reason) => {
+          if (settled) return;
+          settled = true;
+          if (ok) { try { onReward && onReward(); } catch(e){} }
+          else console.log('[VK] reward not granted:', reason);
+        };
+        const show = () => {
+          this._vk.send('VKWebAppShowNativeAds', { ad_format: 'reward' })
+            .then(d => (d && d.result) ? finish(true) : finish(false, 'closed_without_reward'))
+            .catch(e => finish(false, (e && e.error_type) || 'ad_error'));
+        };
+        try {
+          this._vk.send('VKWebAppCheckNativeAds', { ad_format: 'reward' })
+            .then(d => (d && d.result) ? show() : finish(false, 'adv_unavailable'))
+            .catch(() => show());
+        } catch(e) { show(); }
+      } else if (this.name === 'yandex') {
+        if (!this._ysdk || !this._ysdk.adv || typeof this._ysdk.adv.showRewardedVideo !== 'function') {
+          // В оффлайне / при отсутствии рекламы — даём награду (для тестов)
+          onReward && onReward();
+          return;
+        }
+        try {
+          this._ysdk.adv.showRewardedVideo({
+            callbacks: {
+              onOpen: () => { this.gameplayStop(); },
+              onRewarded: () => { try { onReward && onReward(); } catch(e){} },
+              onClose: () => { if (phase === 'battle') this.gameplayStart(); },
+              onError: () => { if (phase === 'battle') this.gameplayStart(); }
+            }
+          });
+        } catch(e) { if (phase === 'battle') this.gameplayStart(); }
+      } else {
+        // Offline — сразу выдаём награду
+        onReward && onReward();
+      }
+    }
+  };
+
+  // Обёртки для старого кода (минимальные изменения)
+  function gameplayStart() { Platform.gameplayStart(); }
+  function gameplayStop()  { Platform.gameplayStop(); }
+  function showFullscreenAd(cb) { Platform.showInterstitial(cb); }
+  function showRewardedAd(cb)   { Platform.showRewarded(cb); }
+
+  /* ======================= ИГРОВАЯ ЛОГИКА ======================= */
   const SIZE = 10;
   const SHIP_CONFIG = [
     { size: 4, count: 1 }, { size: 3, count: 2 },
@@ -1246,7 +1368,6 @@
   function getLeftBoard()  { return mode === 'bot' ? boards[0] : boards[activePlayer]; }
   function getRightBoard() { return mode === 'bot' ? boards[1] : boards[1 - activePlayer]; }
 
-  // ⬇️ Ключевая функция: включает/выключает режим "большого поля" во время боя
   function updateBattleModeClass() {
     if (phase === 'battle') {
       document.body.classList.add('battle-mode');
@@ -1282,7 +1403,6 @@
     playerGridEl.classList.toggle('place-active', phase === 'placement');
     updateScoutButton();
 
-    // Применяем battle-mode
     updateBattleModeClass();
   }
 
@@ -1668,9 +1788,20 @@
     else if (phase === 'battle') gameplayStart();
   });
 
+  /* ======================= BOOT ======================= */
+  LANG = detectLocalLang();
   applyTranslations();
   backToMenu();
-  initYandexSDK();
+
+  (async () => {
+    try { await Platform.init(); } catch(e) { console.warn('[BOOT] Platform init error:', e); }
+    if (Platform.lang && TRANSLATIONS[Platform.lang]) LANG = Platform.lang;
+    applyTranslations();
+    if (phase === 'placement') renderPlacementInfo();
+    if (phase === 'battle') updateStatus();
+    if (phase !== 'menu' && boards.length) renderAll();
+    console.log('[BOOT] Платформа:', Platform.name, '| Язык:', LANG);
+  })();
 })();
 </script>
 </body>
