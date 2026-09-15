@@ -8,7 +8,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#f6f0dd">
 <title>Морской бой</title>
-<script src="/sdk.js"></script>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
@@ -133,9 +132,6 @@
     border-bottom: 1px dashed var(--ink-faded);
   }
 
-  /* ============================================================
-     СЕТКА — размер клетки плавно увеличивается в battle-mode
-     ============================================================ */
   .grid {
     display: grid;
     grid-template-columns: repeat(10, var(--cell));
@@ -550,7 +546,6 @@
   }
   #newGameBtn:hover { background: linear-gradient(180deg, #f0e8dc 0%, #d8d0bc 100%); }
 
-  /* Overlays */
   .overlay {
     position: fixed;
     inset: 0;
@@ -669,9 +664,6 @@
     filter: drop-shadow(2px 2px 0 rgba(60, 100, 160, 0.2));
   }
 
-  /* ============================================================
-     БАЗОВЫЙ ШИРОКОФОРМАТНЫЙ РЕЖИМ (расстановка)
-     ============================================================ */
   @media (min-aspect-ratio: 16/10) and (min-height: 450px) {
     :root { --cell: min(4.8vh, 3vw, 50px); }
 
@@ -755,9 +747,6 @@
     :root { --cell: min(4.9vh, 2.8vw, 54px); }
   }
 
-  /* ============================================================
-     BATTLE-MODE — БОЛЬШОЕ ПОЛЕ, КОГДА ПАНЕЛЬ РАССТАНОВКИ СКРЫТА
-     ============================================================ */
   @media (min-aspect-ratio: 16/10) and (min-height: 450px) {
     body.battle-mode { --cell: min(6.8vh, 4.2vw, 72px); }
 
@@ -769,7 +758,6 @@
     body.battle-mode { --cell: min(7vh, 3.6vw, 78px); }
   }
 
-  /* На средних экранах (когда места не очень много) — умеренно увеличиваем */
   @media (min-aspect-ratio: 16/10) and (max-height: 700px) {
     body.battle-mode { --cell: min(6.4vh, 4vw, 64px); }
   }
@@ -778,9 +766,6 @@
     body.battle-mode { --cell: min(6vh, 4vw, 56px); }
   }
 
-  /* ============================================================
-     МОБИЛЬНАЯ ПОРТРЕТНАЯ
-     ============================================================ */
   @media (max-aspect-ratio: 4/3) {
     :root { --cell: min(8vw, 8vh, 40px); }
     .game { gap: 8px; }
@@ -801,7 +786,6 @@
     #scoutBtn { min-width: 200px; font-size: 12px; }
     #newGameBtn { min-width: 110px; }
 
-    /* В бою на мобильном — одно поле, значит можно заметно крупнее */
     body.battle-mode { --cell: min(11vw, 9vh, 56px); }
   }
 
@@ -824,7 +808,6 @@
     body.battle-mode { --cell: min(11.5vw, 9.5vh, 52px); }
   }
 
-  /* Ландшафт телефона */
   @media (max-height: 520px) and (orientation: landscape) {
     :root { --cell: min(6.2vh, 6vw, 34px); }
     body { padding: 4px 8px; }
@@ -920,7 +903,6 @@
   </div>
 </div>
 
-<!-- Главное меню -->
 <div class="overlay" id="menu">
   <div class="overlay-box">
     <div class="icon">⚓</div>
@@ -936,7 +918,6 @@
   </div>
 </div>
 
-<!-- Экран передачи хода -->
 <div class="overlay hidden" id="pass">
   <div class="overlay-box">
     <div class="icon">🎮</div>
@@ -1052,54 +1033,7 @@
     return 'en';
   }
 
-  let ysdk = null;
-  let lastAdTime = 0;
-  const MIN_AD_INTERVAL = 60000;
   const SCOUT_COOLDOWN_MS = 60000;
-
-  function initYandexSDK() {
-    LANG = detectLocalLang();
-    if (typeof YaGames === 'undefined') { applyTranslations(); return; }
-    YaGames.init().then(sdk => {
-      ysdk = sdk;
-      try {
-        const yandexLang = ysdk.environment.i18n.lang;
-        if (yandexLang === 'ru' || yandexLang === 'en' || yandexLang === 'tr') LANG = yandexLang;
-        else if (yandexLang) LANG = 'en';
-      } catch (e) {}
-      applyTranslations();
-      updateStatus();
-      renderAll();
-      ysdk.features.LoadingAPI?.ready();
-    }).catch(err => { console.error('[YSDK] Init failed:', err); applyTranslations(); });
-  }
-
-  function gameplayStart() { try { ysdk?.features?.GameplayAPI?.start(); } catch (e) {} }
-  function gameplayStop() { try { ysdk?.features?.GameplayAPI?.stop(); } catch (e) {} }
-
-  function showFullscreenAd(callback) {
-    const now = Date.now();
-    if (now - lastAdTime < MIN_AD_INTERVAL) { callback?.(); return; }
-    if (!ysdk) { callback?.(); return; }
-    ysdk.adv.showFullscreenAdv({
-      callbacks: {
-        onClose: () => { lastAdTime = Date.now(); callback?.(); },
-        onError: (err) => { console.warn('[YSDK] Fullscreen error:', err); callback?.(); }
-      }
-    });
-  }
-
-  function showRewardedAd(onReward) {
-    if (!ysdk) { onReward?.(); return; }
-    ysdk.adv.showRewardedVideo({
-      callbacks: {
-        onOpen: () => { gameplayStop(); },
-        onRewarded: () => { onReward?.(); },
-        onClose: () => { if (phase === 'battle') gameplayStart(); },
-        onError: () => { if (phase === 'battle') gameplayStart(); }
-      }
-    });
-  }
 
   const SIZE = 10;
   const SHIP_CONFIG = [
@@ -1246,7 +1180,6 @@
   function getLeftBoard()  { return mode === 'bot' ? boards[0] : boards[activePlayer]; }
   function getRightBoard() { return mode === 'bot' ? boards[1] : boards[1 - activePlayer]; }
 
-  // ⬇️ Ключевая функция: включает/выключает режим "большого поля" во время боя
   function updateBattleModeClass() {
     if (phase === 'battle') {
       document.body.classList.add('battle-mode');
@@ -1282,7 +1215,6 @@
     playerGridEl.classList.toggle('place-active', phase === 'placement');
     updateScoutButton();
 
-    // Применяем battle-mode
     updateBattleModeClass();
   }
 
@@ -1374,15 +1306,15 @@
     }
     scoutBtn.disabled = true; scoutBtn.classList.add('cooldown');
     scoutBtn.textContent = t('scoutLoading');
-    showRewardedAd(() => {
-      doScout(targetBoard);
-      scoutCooldownEnd[idx] = Date.now() + SCOUT_COOLDOWN_MS;
-      renderAll();
-      statusEl.textContent = t('scoutFound');
-      statusEl.className = 'status scout';
-      setTimeout(() => updateStatus(), 1800);
-      if (navigator.vibrate) navigator.vibrate([30, 40, 30]);
-    });
+
+    // Заглушка вместо рекламы — награда выдаётся сразу
+    doScout(targetBoard);
+    scoutCooldownEnd[idx] = Date.now() + SCOUT_COOLDOWN_MS;
+    renderAll();
+    statusEl.textContent = t('scoutFound');
+    statusEl.className = 'status scout';
+    setTimeout(() => updateStatus(), 1800);
+    if (navigator.vibrate) navigator.vibrate([30, 40, 30]);
   }
 
   function doScout(board) {
@@ -1443,7 +1375,7 @@
       if (mode === 'bot') {
         phase = 'battle'; playerTurn = true;
         placementPanel.classList.add('hidden');
-        renderAll(); updateStatus(); gameplayStart();
+        renderAll(); updateStatus();
       } else {
         if (activePlayer === 0) {
           renderAll(); updateStatus();
@@ -1455,7 +1387,7 @@
         } else {
           phase = 'battle'; activePlayer = 0;
           placementPanel.classList.add('hidden');
-          renderAll(); updateStatus(); gameplayStart();
+          renderAll(); updateStatus();
           showPass(t('passTitle', { n: 1 }), t('passReady', { n: 1 }), () => { renderAll(); updateStatus(); });
         }
       }
@@ -1553,7 +1485,7 @@
 
   function endGame(winnerIdx) {
     phase = 'over'; busy = false;
-    gameplayStop(); stopScoutTimer();
+    stopScoutTimer();
     if (mode === 'bot') {
       const playerWon = winnerIdx === 0;
       statusEl.textContent = playerWon ? t('win') : t('lose');
@@ -1567,7 +1499,6 @@
     playerGridEl.classList.remove('place-active');
     scoutBtn.style.display = 'none';
     updateBattleModeClass();
-    setTimeout(() => { showFullscreenAd(); }, 1200);
   }
 
   function startGame(m) {
@@ -1590,7 +1521,7 @@
   }
 
   function backToMenu() {
-    gameplayStop(); stopScoutTimer();
+    stopScoutTimer();
     phase = 'menu'; boards = []; playerCells = []; enemyCells = [];
     playerGridEl.innerHTML = ''; enemyGridEl.innerHTML = ''; fleetListEl.innerHTML = '';
     placementPanel.classList.add('hidden');
@@ -1625,7 +1556,7 @@
     if (mode === 'bot') {
       phase = 'battle'; playerTurn = true;
       placementPanel.classList.add('hidden');
-      renderAll(); updateStatus(); gameplayStart();
+      renderAll(); updateStatus();
     } else {
       if (activePlayer === 0) {
         renderAll(); updateStatus();
@@ -1637,7 +1568,7 @@
       } else {
         phase = 'battle'; activePlayer = 0;
         placementPanel.classList.add('hidden');
-        renderAll(); updateStatus(); gameplayStart();
+        renderAll(); updateStatus();
         showPass(t('passTitle', { n: 1 }), t('passReady', { n: 1 }), () => { renderAll(); updateStatus(); });
       }
     }
@@ -1663,14 +1594,10 @@
     lastTouchEnd = now;
   }, { passive: false });
 
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) gameplayStop();
-    else if (phase === 'battle') gameplayStart();
-  });
-
   applyTranslations();
   backToMenu();
-  initYandexSDK();
+  LANG = detectLocalLang();
+  applyTranslations();
 })();
 </script>
 </body>
